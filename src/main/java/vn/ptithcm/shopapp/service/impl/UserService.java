@@ -61,6 +61,7 @@ public class UserService implements IUserService {
         Role role = getExistRole(user);
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setActive(true);
         userRepository.save(user);
 
         return userConverter.convertToUserResponseDTO(user);
@@ -68,7 +69,14 @@ public class UserService implements IUserService {
 
     @Override
     public UserResponseDTO handleUpdateUser(User userRequest) {
-        return null;
+        User user = userRepository.findById(userRequest.getId())
+                .orElseThrow(() -> new IdInvalidException("User with id= " + userRequest.getId() + " does not exists "));
+
+        user.setActive(userRequest.getActive());
+
+        userRepository.save(user);
+
+        return this.userConverter.convertToUserResponseDTO(user);
     }
 
     public Role getExistRole(User user) {

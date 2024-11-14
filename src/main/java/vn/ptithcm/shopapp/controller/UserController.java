@@ -7,11 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
+import vn.ptithcm.shopapp.validation.CreateUserValidationGroup;
+import vn.ptithcm.shopapp.validation.UpdateUserValidationGroup;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -32,7 +35,7 @@ public class UserController {
 
     @PostMapping("/users")
     @ApiMessage("create a new user")
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody User userRequest){
+    public ResponseEntity<UserResponseDTO> createUser(@Validated(CreateUserValidationGroup.class) @RequestBody User userRequest){
         UserResponseDTO userCreated = userService.handleCreateUser(userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
     }
@@ -49,7 +52,7 @@ public class UserController {
 
     @PutMapping("/users")
     @ApiMessage("update user success")
-    public ResponseEntity<UserResponseDTO> updateUser(@Valid @RequestBody User userRequest){
+    public ResponseEntity<UserResponseDTO> updateUser(@Validated(UpdateUserValidationGroup.class) @RequestBody User userRequest){
         UserResponseDTO userResponseDTO = this.userService.handleUpdateUser(userRequest);
 
         return ResponseEntity.ok(userResponseDTO);

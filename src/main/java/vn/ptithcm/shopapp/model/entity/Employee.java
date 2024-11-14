@@ -7,6 +7,7 @@ import lombok.Setter;
 import vn.ptithcm.shopapp.enums.GenderEnum;
 
 import java.time.Instant;
+import java.util.List;
 
 
 @Entity
@@ -34,4 +35,20 @@ public class Employee extends Base {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore
     private User user;
+
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Order> orders;
+
+    @OneToMany(mappedBy = "employee")
+    @JsonIgnore
+    private List<Invoice> invoices;
+
+    @OneToMany(mappedBy = "employee")
+    @JsonIgnore
+    private List<ImportOrder> importOrders;
+
+    @OneToMany(mappedBy = "employee",fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<InventoryLog> inventoryLogs;
 }

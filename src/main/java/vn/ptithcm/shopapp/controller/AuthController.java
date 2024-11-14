@@ -14,9 +14,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.error.IdInvalidException;
+import vn.ptithcm.shopapp.model.entity.Customer;
+import vn.ptithcm.shopapp.model.entity.Employee;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.LoginRequestDTO;
 import vn.ptithcm.shopapp.model.response.LoginResponseDTO;
+import vn.ptithcm.shopapp.service.ICustomerService;
+import vn.ptithcm.shopapp.service.IEmployeeService;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
@@ -28,16 +32,23 @@ public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
     private final IUserService userService;
+    private final ICustomerService customerService;
+    private final IEmployeeService employeeService;
 
 
     @Value("${ptithcm.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
+    private final String ROLE_CUSTOMER = "CUSTOMER";
+    private final String ANONYMOUS = "ANONYMOUS";
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, IUserService userService) {
+
+    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, IUserService userService, ICustomerService customerService, IEmployeeService employeeService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
+        this.customerService = customerService;
+        this.employeeService = employeeService;
     }
 
     @PostMapping("/auth/login")
@@ -68,11 +79,12 @@ public class AuthController {
         LoginResponseDTO result = new LoginResponseDTO();
 
         if (currentUserDB != null) {
+            String name = getUserLoginName(currentUserDB);
             LoginResponseDTO.UserLoginResponseDTO userLogin
                     = new LoginResponseDTO.UserLoginResponseDTO(
                     currentUserDB.getId(),
                     currentUserDB.getUsername(),
-//                    currentUserDB.getEmail(),
+                    name,
                     currentUserDB.getRole()
             );
             result.setUser(userLogin);
@@ -138,12 +150,15 @@ public class AuthController {
         LoginResponseDTO responseLoginDTO = new LoginResponseDTO();
         User currentUserDB = userService.handleGetUserByUsername(username);
 
+
         if (currentUserDB != null) {
+            String name = getUserLoginName(currentUserDB);
+
             LoginResponseDTO.UserLoginResponseDTO userLogin
                     = new LoginResponseDTO.UserLoginResponseDTO(
                     currentUserDB.getId(),
                     currentUserDB.getUsername(),
-//                    currentUserDB.getEmail(),
+                    name,
                     currentUserDB.getRole()
             );
             responseLoginDTO.setUser(userLogin);
@@ -158,5 +173,21 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, createCookie(refreshToken, refreshTokenExpiration).toString())
                 .body(responseLoginDTO);
+    }
+
+    public String getUserLoginName(User user){
+        if(!user.getRole().getCode().equals(ROLE_CUSTOMER)){
+            Employee employee = this.employeeService.fetchEmployeeByUserId(user.getId());
+            if(employee!= null){
+                return employee.getFullName();
+            }
+        }
+        else{
+            Customer customer = this.customerService.fetchCustomerByUserId(user.getId());
+            if (customer!= null){
+                return customer.getFullName();
+            }
+        }
+        return ANONYMOUS;
     }
 }
