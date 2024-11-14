@@ -1,13 +1,16 @@
 package vn.ptithcm.shopapp.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import vn.ptithcm.shopapp.enums.StatusEnum;
 import vn.ptithcm.shopapp.validation.CreateUserValidationGroup;
 import vn.ptithcm.shopapp.validation.UpdateUserValidationGroup;
+
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -21,7 +24,7 @@ public class User extends Base{
     @NotBlank(message = "Password must be filled", groups = CreateUserValidationGroup.class)
     private String password;
 
-    @NotBlank(message = "Active status must be filled", groups = UpdateUserValidationGroup.class)
+    @NotNull(message = "Active must not be null", groups = UpdateUserValidationGroup.class)
     private Boolean active;
 
     @Column(columnDefinition = "text")
@@ -34,8 +37,11 @@ public class User extends Base{
     @OneToOne(mappedBy = "user")
     private Customer customer;
 
-
     @OneToOne(mappedBy = "user")
     private Employee employee;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    List<Cart> carts;
 
 }

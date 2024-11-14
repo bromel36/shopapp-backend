@@ -8,6 +8,7 @@ import lombok.Setter;
 import vn.ptithcm.shopapp.enums.GenderEnum;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "customers")
@@ -31,4 +32,9 @@ public class Customer extends Base {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore
     private User user;
+
+
+    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    private List<Order> orders;
 }

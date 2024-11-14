@@ -24,7 +24,7 @@ public class LoginResponseDTO {
     public static class UserLoginResponseDTO {
         private Long id;
         private String username;
-//        private String email;
+        private String name;
         private Role role;
     }
 
@@ -36,6 +36,6 @@ public class LoginResponseDTO {
     public static class UserInsideToken {
         private Long id;
         private String username;
-//        private String email;
+        private String name;
     }
 }

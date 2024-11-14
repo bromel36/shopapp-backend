@@ -47,7 +47,7 @@ public class SecurityUtil {
         LoginResponseDTO.UserInsideToken userInsideToken = new LoginResponseDTO.UserInsideToken();
         userInsideToken.setId(loginResponseDTO.getUser().getId());
         userInsideToken.setUsername(loginResponseDTO.getUser().getUsername());
-//        userInsideToken.setEmail(loginResponseDTO.getUser().getEmail());
+        userInsideToken.setName(loginResponseDTO.getUser().getName());
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
@@ -67,7 +67,8 @@ public class SecurityUtil {
         LoginResponseDTO.UserInsideToken userInsideToken = new LoginResponseDTO.UserInsideToken();
         userInsideToken.setId(loginResponseDTO.getUser().getId());
         userInsideToken.setUsername(loginResponseDTO.getUser().getUsername());
-//        userInsideToken.setEmail(loginResponseDTO.getUser().getEmail());
+        userInsideToken.setName(loginResponseDTO.getUser().getName());
+
 
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
