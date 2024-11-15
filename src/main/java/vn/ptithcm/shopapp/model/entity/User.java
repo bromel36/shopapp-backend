@@ -34,9 +34,11 @@ public class User extends Base{
     @JoinColumn(name = "role_id")
     private Role role;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "user")
     private Customer customer;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "user")
     private Employee employee;
 

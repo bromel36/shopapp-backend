@@ -45,11 +45,11 @@ public class RoleController {
 
     @ApiMessage("fetch all roles")
     @GetMapping("/roles")
-    public ResponseEntity<PaginationResponseDTO> getAllResume(
+    public ResponseEntity<PaginationResponseDTO> getAllRoles(
             @Filter Specification<Role> spec,
             Pageable pageable
     ){
-        PaginationResponseDTO paginationResponseDTO = this.roleService.handleGetAllPermission(spec, pageable);
+        PaginationResponseDTO paginationResponseDTO = this.roleService.handleGetAllRoles(spec, pageable);
 
         return ResponseEntity.ok(paginationResponseDTO);
     }

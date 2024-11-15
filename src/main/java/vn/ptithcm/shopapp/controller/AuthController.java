@@ -18,6 +18,7 @@ import vn.ptithcm.shopapp.model.entity.Customer;
 import vn.ptithcm.shopapp.model.entity.Employee;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.LoginRequestDTO;
+import vn.ptithcm.shopapp.model.response.CustomerResponseDTO;
 import vn.ptithcm.shopapp.model.response.LoginResponseDTO;
 import vn.ptithcm.shopapp.service.ICustomerService;
 import vn.ptithcm.shopapp.service.IEmployeeService;
@@ -176,15 +177,16 @@ public class AuthController {
     }
 
     public String getUserLoginName(User user){
-        if(!user.getRole().getCode().equals(ROLE_CUSTOMER)){
+        if(!user.getRole().getCode().toUpperCase().equals(ROLE_CUSTOMER)){
             Employee employee = this.employeeService.fetchEmployeeByUserId(user.getId());
             if(employee!= null){
                 return employee.getFullName();
             }
         }
         else{
-            Customer customer = this.customerService.fetchCustomerByUserId(user.getId());
-            if (customer!= null){
+            CustomerResponseDTO customer = this.customerService.handleFetchCustomerByUserId(user.getId());
+            if (customer!= null){ //kiểm tra cái if này hơi vô dụng vì bên hàm kia có kiểm tra rồi, ở đây nếu
+                // login với user role là customer mà chưa có thông tin customer tương ứng thì quăng lỗi, ko cho đăng nhập luôn
                 return customer.getFullName();
             }
         }

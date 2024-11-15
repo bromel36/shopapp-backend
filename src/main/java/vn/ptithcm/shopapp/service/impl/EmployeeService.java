@@ -37,6 +37,6 @@ public class EmployeeService implements IEmployeeService {
                 }
             }
         }
-        throw new IdInvalidException("User invalid!!!");
+        throw new IdInvalidException("User not found!!!");
     }
 }
