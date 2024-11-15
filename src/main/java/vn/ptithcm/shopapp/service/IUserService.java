@@ -1,6 +1,9 @@
 package vn.ptithcm.shopapp.service;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import vn.ptithcm.shopapp.model.entity.User;
+import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 
 public interface IUserService {
@@ -15,4 +18,6 @@ public interface IUserService {
     UserResponseDTO handleCreateUser(User userRequest);
 
     UserResponseDTO handleUpdateUser(User userRequest);
+
+    PaginationResponseDTO handleGetAllUsers(Specification<User> spec, Pageable pageable);
 }

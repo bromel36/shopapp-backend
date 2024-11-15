@@ -3,9 +3,12 @@ package vn.ptithcm.shopapp.config;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import vn.ptithcm.shopapp.model.entity.Employee;
 import vn.ptithcm.shopapp.model.entity.Permission;
 import vn.ptithcm.shopapp.model.entity.Role;
 import vn.ptithcm.shopapp.model.entity.User;
+import vn.ptithcm.shopapp.repository.EmployeeRepository;
 import vn.ptithcm.shopapp.repository.PermissionRepository;
 import vn.ptithcm.shopapp.repository.RoleRepository;
 import vn.ptithcm.shopapp.repository.UserRepository;
@@ -20,13 +23,17 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmployeeRepository employeeRepository;
 
-    public DatabaseInitializer(PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DatabaseInitializer(PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, EmployeeRepository employeeRepository) {
         this.permissionRepository = permissionRepository;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.employeeRepository = employeeRepository;
     }
+
+    @Transactional
     @Override
     public void run(String... args) throws Exception {
         System.out.println("Initializing Database...");
@@ -70,6 +77,13 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             this.userRepository.save(adminUser);
 
+            if(employeeRepository.findByUserId(adminUser.getId()) == null){
+                Employee employee = new Employee();
+                employee.setFullName("I AM SUPER ADMIN");
+                employee.setUser(adminUser);
+
+                employeeRepository.save(employee);
+            }
         }
 
         if (permissionSize > 0 && roleSize > 0 && userSize > 0) {

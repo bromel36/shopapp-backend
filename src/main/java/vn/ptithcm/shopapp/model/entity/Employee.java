@@ -33,7 +33,6 @@ public class Employee extends Base {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)

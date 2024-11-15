@@ -4,6 +4,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import vn.ptithcm.shopapp.model.entity.Customer;
 import vn.ptithcm.shopapp.model.response.CustomerResponseDTO;
+import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 
 @Component
 public class CustomerConverter {
@@ -18,7 +19,7 @@ public class CustomerConverter {
     public CustomerResponseDTO convertToCustomerResponseDTO(Customer customer) {
         CustomerResponseDTO responseDTO = modelMapper.map(customer, CustomerResponseDTO.class);
 
-        CustomerResponseDTO.CustomerUser customerUser = CustomerResponseDTO.CustomerUser.builder()
+        UserResponseDTO customerUser = UserResponseDTO.builder()
                 .id(customer.getUser().getId())
                 .active(customer.getUser().getActive())
                 .username(customer.getUser().getUsername())

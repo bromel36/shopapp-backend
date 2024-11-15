@@ -26,7 +26,7 @@ public class AuditEntityListener {
                 SecurityUtil.getCurrentUserLogin().get()
                 : "";
         Instant updatedAt = Instant.now();
-        entity.setCreatedAt(updatedAt);
-        entity.setCreatedBy(username);
+        entity.setUpdatedAt(updatedAt);
+        entity.setUpdatedBy(username);
     }
 }

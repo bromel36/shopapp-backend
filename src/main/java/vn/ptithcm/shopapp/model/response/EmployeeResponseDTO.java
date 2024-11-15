@@ -1,17 +1,17 @@
 package vn.ptithcm.shopapp.model.response;
 
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import vn.ptithcm.shopapp.enums.GenderEnum;
 
 import java.time.Instant;
 
-
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class CustomerResponseDTO {
+@NoArgsConstructor
+public class EmployeeResponseDTO {
     private Long id;
 
     private String fullName;
@@ -20,7 +20,8 @@ public class CustomerResponseDTO {
     private String phone;
     private GenderEnum gender;
     private Instant birthday;
-    private String shoppingAddress;
+    private Instant hireDate;
+    private Double salary;
     private String avatar;
     private UserResponseDTO user;
 
@@ -28,5 +29,6 @@ public class CustomerResponseDTO {
     private Instant createdAt;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Instant updatedAt;
+
 
 }
