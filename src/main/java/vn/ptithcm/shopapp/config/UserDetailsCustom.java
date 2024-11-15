@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.service.IUserService;
 
 import java.util.Collections;
@@ -26,7 +27,9 @@ public class UserDetailsCustom implements UserDetailsService {
         if(myUser == null){
             throw new UsernameNotFoundException("username/password incorrect");
         }
-
+        if(!myUser.getActive()){
+            throw new IdInvalidException("User is inactive!!!");
+        }
         return new User(
                 myUser.getUsername(),
                 myUser.getPassword(),

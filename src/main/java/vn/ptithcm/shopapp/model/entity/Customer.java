@@ -30,11 +30,11 @@ public class Customer extends Base {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @JsonIgnore
+//    @JsonIgnore
     private User user;
 
 
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Order> orders;
 }

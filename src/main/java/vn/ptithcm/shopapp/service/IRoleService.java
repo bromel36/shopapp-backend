@@ -13,7 +13,7 @@ public interface IRoleService {
 
     void handleDeleteRole(Long id);
 
-    PaginationResponseDTO handleGetAllPermission(Specification<Role> spec, Pageable pageable);
+    PaginationResponseDTO handleGetAllRoles(Specification<Role> spec, Pageable pageable);
 
     Role handleFetchRoleById(Long id);
 }
