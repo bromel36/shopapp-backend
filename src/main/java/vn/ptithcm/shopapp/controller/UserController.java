@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.User;
+import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
@@ -27,7 +28,7 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     @ApiMessage("fetch user by id")
-    public ResponseEntity<UserResponseDTO> getUser(@PathVariable("id") Long id){
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable("id") Long id) {
         return ResponseEntity.ok(this.userService.handleFetchUserById(id));
     }
 
@@ -40,15 +41,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
     }
 
-//    @GetMapping("/users")
-//    @ApiMessage("fetch all users")
-//    public ResponseEntity<PaginationResponseDTO> getAllUsers(
-//            @Filter Specification<User> spec,
-//            Pageable pageable
-//    ){
-//        PaginationResponseDTO paginationResponseDTO = userService.handleGetAllUsers(spec, pageable);
-//        return ResponseEntity.ok(paginationResponseDTO);
-//    }
+    @GetMapping("/users")
+    @ApiMessage("fetch all users")
+    public ResponseEntity<PaginationResponseDTO> getAllUsers(
+            @Filter Specification<User> spec,
+            Pageable pageable
+    ){
+        PaginationResponseDTO paginationResponseDTO = userService.handleGetAllUsers(spec, pageable);
+        return ResponseEntity.ok(paginationResponseDTO);
+    }
 
     @PutMapping("/users")
     @ApiMessage("update user success")

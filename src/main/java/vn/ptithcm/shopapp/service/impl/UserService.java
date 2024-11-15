@@ -1,15 +1,23 @@
 package vn.ptithcm.shopapp.service.impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.ptithcm.shopapp.converter.UserConverter;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.Role;
 import vn.ptithcm.shopapp.model.entity.User;
+import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.repository.UserRepository;
 import vn.ptithcm.shopapp.service.IRoleService;
 import vn.ptithcm.shopapp.service.IUserService;
+import vn.ptithcm.shopapp.util.PaginationUtil;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -78,6 +86,22 @@ public class UserService implements IUserService {
 
         return this.userConverter.convertToUserResponseDTO(user);
     }
+
+    @Override
+    public PaginationResponseDTO handleGetAllUsers(Specification<User> spec, Pageable pageable) {
+        Page<User> users = userRepository.findAll(spec, pageable);
+
+        PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable,users);
+
+        List<UserResponseDTO> userResponseDTOs = users.getContent().stream()
+                        .map(it->userConverter.convertToUserResponseDTO(it))
+                                .collect(Collectors.toList());
+
+        result.setResult(userResponseDTOs);
+
+        return result;
+    }
+
 
     public Role getExistRole(User user) {
         if (user.getRole() == null) {

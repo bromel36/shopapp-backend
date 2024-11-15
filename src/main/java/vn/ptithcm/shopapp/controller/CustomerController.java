@@ -1,11 +1,16 @@
 package vn.ptithcm.shopapp.controller;
 
+import com.turkraft.springfilter.boot.Filter;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.Customer;
 import vn.ptithcm.shopapp.model.entity.Employee;
+import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.response.CustomerResponseDTO;
+import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.ICustomerService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
@@ -36,6 +41,7 @@ public class CustomerController {
     public ResponseEntity<Void> deleteCustomer(@PathVariable("id") Long id) {
         this.customerService.handleDeleteCustomer(id);
         return ResponseEntity.ok(null);
+        //chưa viết gì trong service cả
     }
 
     @GetMapping("/customers/{id}")
@@ -48,5 +54,16 @@ public class CustomerController {
     @ApiMessage("fetch customer by id")
     public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(@PathVariable("id") Long userId){
         return ResponseEntity.ok(this.customerService.handleFetchCustomerByUserId(userId));
+    }
+
+    @GetMapping("/customers")
+    @ApiMessage("fetch all customers")
+    public ResponseEntity<PaginationResponseDTO> getAllCustomers(
+            @Filter Specification<Customer> spec,
+            Pageable pageable
+    ){
+        PaginationResponseDTO paginationResponseDTO;
+        paginationResponseDTO = customerService.handleGetAllCustomers(spec, pageable);
+        return ResponseEntity.ok(paginationResponseDTO);
     }
 }
