@@ -37,11 +37,18 @@ public class RoleController {
 
     @ApiMessage("delete a role")
     @DeleteMapping("/roles/{id}")
-    public ResponseEntity<Void> deleteRole(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteRole(@PathVariable("id") String id) {
         this.roleService.handleDeleteRole(id);
         return ResponseEntity.ok().body(null);
+        // chưa viết gì trong service
     }
 
+
+    @ApiMessage("fetch a role")
+    @GetMapping("/roles/{id}")
+    public ResponseEntity<Role> getRole(@PathVariable("id") String id) {
+        return ResponseEntity.ok(this.roleService.handleFetchRoleById(id));
+    }
 
     @ApiMessage("fetch all roles")
     @GetMapping("/roles")

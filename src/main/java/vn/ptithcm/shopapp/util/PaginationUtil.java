@@ -18,6 +18,8 @@ public class PaginationUtil {
         meta.setTotal(page.getTotalElements());
         meta.setTotalOfCurrentPage(page.getNumberOfElements());
 
+        paginationResponseDTO.setMeta(meta);
+
         return paginationResponseDTO;
     }
 }

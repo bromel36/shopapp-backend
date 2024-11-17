@@ -38,7 +38,7 @@ public class CustomerController {
 
     @DeleteMapping("customers/{id}")
     @ApiMessage("delete a customer")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable("id") String id) {
         this.customerService.handleDeleteCustomer(id);
         return ResponseEntity.ok(null);
         //chưa viết gì trong service cả
@@ -46,13 +46,13 @@ public class CustomerController {
 
     @GetMapping("/customers/{id}")
     @ApiMessage("fetch customer by id")
-    public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable("id") Long id){
+    public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable("id") String id){
         return ResponseEntity.ok(this.customerService.handleFetchCustomerById(id));
     }
 
     @GetMapping("/customers/by-user/{id}")
     @ApiMessage("fetch customer by id")
-    public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(@PathVariable("id") Long userId){
+    public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(@PathVariable("id") String userId){
         return ResponseEntity.ok(this.customerService.handleFetchCustomerByUserId(userId));
     }
 

@@ -16,8 +16,8 @@ public class Base implements Serializable {
     private static final long serialVersionUID = -863164858986274318L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     private Instant createdAt;
 

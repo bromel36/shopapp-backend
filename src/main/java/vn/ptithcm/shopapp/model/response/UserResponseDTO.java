@@ -12,7 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDTO {
-    private Long id;
+    private String id;
     private String username;
     private Boolean active;
 
@@ -30,7 +30,7 @@ public class UserResponseDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class RoleResponse{
-        private Long id;
+        private String id;
         private String code;
     }
 }

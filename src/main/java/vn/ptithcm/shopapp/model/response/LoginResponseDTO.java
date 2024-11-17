@@ -22,11 +22,11 @@ public class LoginResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserLoginResponseDTO {
-        private Long id;
-    private String username;
-    private String name;
-    private Role role;
-}
+        private String id;
+        private String username;
+        private String name;
+        private Role role;
+    }
 
 
     @Getter
@@ -34,7 +34,7 @@ public class LoginResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserInsideToken {
-        private Long id;
+        private String id;
         private String username;
         private String name;
     }

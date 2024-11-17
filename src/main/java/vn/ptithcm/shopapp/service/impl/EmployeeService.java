@@ -35,7 +35,7 @@ public class EmployeeService implements IEmployeeService {
 
     @Override
     public EmployeeResponseDTO handleCreateEmployee(Employee employee) {
-        if(employee.getUser()!= null && employee.getUser().getId() != null) {
+        if(employee.getUser()== null || employee.getUser().getId() == null) {
             throw new IdInvalidException("User ID is required!!!");
         }
 
@@ -75,7 +75,7 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
-    public EmployeeResponseDTO handleFetchEmployeeById(Long id) {
+    public EmployeeResponseDTO handleFetchEmployeeById(String id) {
         Employee employeeDB = employeeRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Employee not found."));
 
@@ -83,7 +83,7 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
-    public EmployeeResponseDTO handleFetchEmployeeByUserId(Long userId) {
+    public EmployeeResponseDTO handleFetchEmployeeByUserId(String userId) {
         Employee employee = employeeRepository.findByUserId(userId);
         if (employee != null) {
             return employeeConverter.convertToEmployeeResponseDTO(employee);

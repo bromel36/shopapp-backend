@@ -13,7 +13,7 @@ public interface IUserService {
 
     User getUserByRefreshTokenAndUsername(String refreshToken, String username);
 
-    UserResponseDTO handleFetchUserById(Long id);
+    UserResponseDTO handleFetchUserById(String id);
 
     UserResponseDTO handleCreateUser(User userRequest);
 
