@@ -20,6 +20,8 @@ public class Customer extends Base {
     private String email;
 
     private String phone;
+
+    @Enumerated(EnumType.STRING)
     private GenderEnum gender;
 
     private Instant birthday;

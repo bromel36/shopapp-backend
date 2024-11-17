@@ -12,9 +12,9 @@ public interface IEmployeeService {
 
     EmployeeResponseDTO handleUpdateEmployee(Employee employee);
 
-    EmployeeResponseDTO handleFetchEmployeeById(Long id);
+    EmployeeResponseDTO handleFetchEmployeeById(String id);
 
-    EmployeeResponseDTO handleFetchEmployeeByUserId(Long userId);
+    EmployeeResponseDTO handleFetchEmployeeByUserId(String userId);
 
     PaginationResponseDTO handleGetAllEmployees(Specification<Employee> spec, Pageable pageable);
 }

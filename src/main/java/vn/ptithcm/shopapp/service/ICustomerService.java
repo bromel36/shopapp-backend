@@ -13,11 +13,11 @@ public interface ICustomerService {
 
     CustomerResponseDTO handleUpdateCustomer(Customer customer);
 
-    void handleDeleteCustomer(Long id);
+    void handleDeleteCustomer(String id);
 
-    CustomerResponseDTO handleFetchCustomerById(Long id);
+    CustomerResponseDTO handleFetchCustomerById(String id);
 
-    CustomerResponseDTO handleFetchCustomerByUserId(Long userId);
+    CustomerResponseDTO handleFetchCustomerByUserId(String userId);
 
     PaginationResponseDTO handleGetAllCustomers(Specification<Customer> spec, Pageable pageable);
 }

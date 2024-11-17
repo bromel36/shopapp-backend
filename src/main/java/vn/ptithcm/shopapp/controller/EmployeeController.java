@@ -36,13 +36,13 @@ public class EmployeeController {
 
     @GetMapping("/employees/{id}")
     @ApiMessage("fetch a employee")
-    public ResponseEntity<EmployeeResponseDTO> getEmployeeById(@PathVariable("id") Long id) {
+    public ResponseEntity<EmployeeResponseDTO> getEmployeeById(@PathVariable("id") String id) {
         return ResponseEntity.ok().body(this.employeeService.handleFetchEmployeeById(id));
     }
 
     @GetMapping("/employees/by-user/{id}")
     @ApiMessage("fetch a employee by user")
-    public ResponseEntity<EmployeeResponseDTO> getEmployeeByUser(@PathVariable("id") Long userId) {
+    public ResponseEntity<EmployeeResponseDTO> getEmployeeByUser(@PathVariable("id") String userId) {
         return ResponseEntity.ok().body(this.employeeService.handleFetchEmployeeByUserId(userId));
     }
 

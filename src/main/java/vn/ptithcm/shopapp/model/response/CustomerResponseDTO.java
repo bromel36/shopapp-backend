@@ -12,7 +12,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerResponseDTO {
-    private Long id;
+    private String id;
 
     private String fullName;
     private String address;

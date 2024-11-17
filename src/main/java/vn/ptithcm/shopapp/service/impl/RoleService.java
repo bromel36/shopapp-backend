@@ -22,6 +22,7 @@ public class RoleService implements IRoleService {
 
     private final RoleRepository roleRepository;
     private final IPermissionService permissionService;
+
     public RoleService(RoleRepository roleRepository, IPermissionService permissionService) {
         this.roleRepository = roleRepository;
         this.permissionService = permissionService;
@@ -29,14 +30,14 @@ public class RoleService implements IRoleService {
 
     @Override
     public Role handleCreateRole(Role role) {
-        if(isExistsCode(role.getCode())){
+        if (isExistsCode(role.getCode())) {
             throw new IdInvalidException("Role already exists");
         }
 
-        if (role.getPermissions()!= null && !role.getPermissions().isEmpty()) {
+        if (role.getPermissions() != null && !role.getPermissions().isEmpty()) {
             List<Permission> permissions = role.getPermissions();
 
-            List<Long> permissionIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
+            List<String> permissionIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
 
             List<Permission> permissionDB = this.permissionService.handleFetchPermissionByIds(permissionIds);
 
@@ -51,14 +52,14 @@ public class RoleService implements IRoleService {
         Role currentRole = this.roleRepository.findById(role.getId())
                 .orElseThrow(() -> new IdInvalidException("Role not found"));
 
-        if(!currentRole.getCode().equals(role.getCode()) && isExistsCode(role.getCode())){
+        if (!currentRole.getCode().equals(role.getCode()) && isExistsCode(role.getCode())) {
             throw new IdInvalidException("Role Code already exists");
         }
 
-        if (role.getPermissions()!= null && !role.getPermissions().isEmpty()) {
+        if (role.getPermissions() != null && !role.getPermissions().isEmpty()) {
             List<Permission> permissions = role.getPermissions();
 
-            List<Long> permissionIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
+            List<String> permissionIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
 
             List<Permission> permissionDB = this.permissionService.handleFetchPermissionByIds(permissionIds);
 
@@ -72,15 +73,15 @@ public class RoleService implements IRoleService {
     }
 
     @Override
-    public void handleDeleteRole(Long id) {
-
+    public void handleDeleteRole(String id) {
+        //
     }
 
     @Override
     public PaginationResponseDTO handleGetAllRoles(Specification<Role> spec, Pageable pageable) {
         Page<Role> roles = roleRepository.findAll(spec, pageable);
 
-        PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable,roles);
+        PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable, roles);
 
         result.setResult(roles.getContent());
 
@@ -91,9 +92,9 @@ public class RoleService implements IRoleService {
         return this.roleRepository.existsByCode(code);
     }
 
-    public Role handleFetchRoleById(Long id){
+    public Role handleFetchRoleById(String id) {
         Role role = this.roleRepository.findById(id)
-                .orElseThrow(()->  new IdInvalidException("Role not found with id = "+ id));
+                .orElseThrow(() -> new IdInvalidException("Role not found with id = " + id));
         return role;
     }
 }

@@ -75,12 +75,12 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    public void handleDeleteCustomer(Long id) {
+    public void handleDeleteCustomer(String id) {
 
     }
 
     @Override
-    public CustomerResponseDTO handleFetchCustomerById(Long id) {
+    public CustomerResponseDTO handleFetchCustomerById(String id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Customer not found."));
 
@@ -88,7 +88,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    public CustomerResponseDTO handleFetchCustomerByUserId(Long userId) {
+    public CustomerResponseDTO handleFetchCustomerByUserId(String userId) {
         Customer customer = customerRepository.findByUserId(userId);
         if (customer != null) {
             return customerConverter.convertToCustomerResponseDTO(customer);

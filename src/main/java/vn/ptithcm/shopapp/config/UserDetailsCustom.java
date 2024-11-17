@@ -33,7 +33,7 @@ public class UserDetailsCustom implements UserDetailsService {
         return new User(
                 myUser.getUsername(),
                 myUser.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")) // role này tạo cho đủ cái constructorr này thôi chớ không có ý nghĩa
         );
     }
 

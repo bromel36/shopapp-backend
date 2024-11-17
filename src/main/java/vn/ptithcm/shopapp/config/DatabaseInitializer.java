@@ -25,6 +25,9 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final EmployeeRepository employeeRepository;
 
+    private final String INITIAL_PASSWORD = "123456";
+    private final String INITIAL_ROLE = "SUPER_ADMIN";
+
     public DatabaseInitializer(PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, EmployeeRepository employeeRepository) {
         this.permissionRepository = permissionRepository;
         this.roleRepository = roleRepository;
@@ -68,9 +71,9 @@ public class DatabaseInitializer implements CommandLineRunner {
             User adminUser = new User();
             adminUser.setUsername("admin@gmail.com");
             adminUser.setActive(true);
-            adminUser.setPassword(this.passwordEncoder.encode("123456"));
+            adminUser.setPassword(this.passwordEncoder.encode(INITIAL_PASSWORD));
 
-            Role adminRole = this.roleRepository.findByCode("SUPER_ADMIN");
+            Role adminRole = this.roleRepository.findByCode(INITIAL_ROLE);
             if (adminRole != null) {
                 adminUser.setRole(adminRole);
             }

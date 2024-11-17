@@ -14,8 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.error.IdInvalidException;
-import vn.ptithcm.shopapp.model.entity.Customer;
-import vn.ptithcm.shopapp.model.entity.Employee;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.LoginRequestDTO;
 import vn.ptithcm.shopapp.model.response.CustomerResponseDTO;
@@ -177,16 +175,15 @@ public class AuthController {
                 .body(responseLoginDTO);
     }
 
-    public String getUserLoginName(User user){
-        if(!user.getRole().getCode().toUpperCase().equals(ROLE_CUSTOMER)){
+    public String getUserLoginName(User user) {
+        if (!user.getRole().getCode().toUpperCase().equals(ROLE_CUSTOMER)) {
             EmployeeResponseDTO employee = this.employeeService.handleFetchEmployeeByUserId(user.getId());
-            if(employee!= null){
+            if (employee != null) {
                 return employee.getFullName();
             }
-        }
-        else{
+        } else {
             CustomerResponseDTO customer = this.customerService.handleFetchCustomerByUserId(user.getId());
-            if (customer!= null){
+            if (customer != null) {
                 return customer.getFullName();
             }
         }

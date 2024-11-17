@@ -11,9 +11,9 @@ public interface IRoleService {
 
     Role handleUpdateRole(Role role);
 
-    void handleDeleteRole(Long id);
+    void handleDeleteRole(String id);
 
     PaginationResponseDTO handleGetAllRoles(Specification<Role> spec, Pageable pageable);
 
-    Role handleFetchRoleById(Long id);
+    Role handleFetchRoleById(String id);
 }

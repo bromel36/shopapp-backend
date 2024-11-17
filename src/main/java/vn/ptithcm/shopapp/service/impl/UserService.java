@@ -52,7 +52,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponseDTO handleFetchUserById(Long id) {
+    public UserResponseDTO handleFetchUserById(String id) {
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("User with id= " + id + " does not exists "));
 
