@@ -23,10 +23,10 @@ public class LoginResponseDTO {
     @AllArgsConstructor
     public static class UserLoginResponseDTO {
         private Long id;
-        private String username;
-        private String name;
-        private Role role;
-    }
+    private String username;
+    private String name;
+    private Role role;
+}
 
 
     @Getter
