@@ -22,7 +22,7 @@ import java.util.Optional;
 public class SecurityUtil {
 
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
-
+    public static final String ROLE_CUSTOMER = "CUSTOMER";
     private final JwtEncoder jwtEncoder;
 
 

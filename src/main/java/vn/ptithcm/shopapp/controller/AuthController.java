@@ -39,7 +39,7 @@ public class AuthController {
     @Value("${ptithcm.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
-    private final String ROLE_CUSTOMER = "CUSTOMER";
+
     private final String ANONYMOUS = "ANONYMOUS";
 
 
@@ -176,7 +176,7 @@ public class AuthController {
     }
 
     public String getUserLoginName(User user) {
-        if (!user.getRole().getCode().toUpperCase().equals(ROLE_CUSTOMER)) {
+        if (!user.getRole().getCode().toUpperCase().equals(SecurityUtil.ROLE_CUSTOMER)) {
             EmployeeResponseDTO employee = this.employeeService.handleFetchEmployeeByUserId(user.getId());
             if (employee != null) {
                 return employee.getFullName();

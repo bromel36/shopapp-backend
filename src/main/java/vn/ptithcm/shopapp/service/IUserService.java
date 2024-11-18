@@ -20,4 +20,5 @@ public interface IUserService {
     UserResponseDTO handleUpdateUser(User userRequest);
 
     PaginationResponseDTO handleGetAllUsers(Specification<User> spec, Pageable pageable);
+
 }
