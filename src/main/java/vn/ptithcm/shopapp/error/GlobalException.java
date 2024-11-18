@@ -54,7 +54,6 @@ public class GlobalException {
         res.setMessage("Exception occur ....");
         res.setError(ex.getMessage());
         res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
     }
     @ExceptionHandler(AccessDeniedException.class)
@@ -65,6 +64,17 @@ public class GlobalException {
         res.setStatusCode(HttpStatus.FORBIDDEN.value());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
+    }
+
+    @ExceptionHandler(OutOfStockException.class)
+    public ResponseEntity<RestResponse<Object>> handleOutOfStockException(OutOfStockException ex){
+        RestResponse<Object> res = new RestResponse<>();
+        res.setMessage("Exception occur ....");
+        res.setError(ex.getMessage());
+        res.setStatusCode(HttpStatus.CONFLICT.value());
+        res.setData(ex.getOutOfStockItems());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(res);
     }
 
 }
