@@ -21,4 +21,5 @@ public interface IUserService {
 
     PaginationResponseDTO handleGetAllUsers(Specification<User> spec, Pageable pageable);
 
+    User getUserLogin();
 }

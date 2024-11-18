@@ -15,6 +15,7 @@ import vn.ptithcm.shopapp.repository.UserRepository;
 import vn.ptithcm.shopapp.service.IRoleService;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.PaginationUtil;
+import vn.ptithcm.shopapp.util.SecurityUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -100,6 +101,15 @@ public class UserService implements IUserService {
         result.setResult(userResponseDTOs);
 
         return result;
+    }
+
+    @Override
+    public User getUserLogin() {
+        String username = SecurityUtil.getCurrentUserLogin()
+                .orElseThrow(() -> new IdInvalidException("User not logged in"));
+
+
+        return handleGetUserByUsername(username);
     }
 
 
