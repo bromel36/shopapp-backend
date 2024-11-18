@@ -33,7 +33,6 @@ public class UserController {
     }
 
 
-
     @PostMapping("/users")
     @ApiMessage("create a new user")
     public ResponseEntity<UserResponseDTO> createUser(@Validated(CreateUserValidationGroup.class) @RequestBody User userRequest){
