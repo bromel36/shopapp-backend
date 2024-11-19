@@ -7,11 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.Customer;
-import vn.ptithcm.shopapp.model.entity.Employee;
-import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.response.CustomerResponseDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
-import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.ICustomerService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 
@@ -46,13 +43,13 @@ public class CustomerController {
 
     @GetMapping("/customers/{id}")
     @ApiMessage("fetch customer by id")
-    public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable("id") String id){
+    public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable("id") String id) {
         return ResponseEntity.ok(this.customerService.handleFetchCustomerById(id));
     }
 
     @GetMapping("/customers/by-user/{id}")
     @ApiMessage("fetch customer by id")
-    public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(@PathVariable("id") String userId){
+    public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(@PathVariable("id") String userId) {
         return ResponseEntity.ok(this.customerService.handleFetchCustomerByUserId(userId));
     }
 
@@ -61,7 +58,7 @@ public class CustomerController {
     public ResponseEntity<PaginationResponseDTO> getAllCustomers(
             @Filter Specification<Customer> spec,
             Pageable pageable
-    ){
+    ) {
         PaginationResponseDTO paginationResponseDTO;
         paginationResponseDTO = customerService.handleGetAllCustomers(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
