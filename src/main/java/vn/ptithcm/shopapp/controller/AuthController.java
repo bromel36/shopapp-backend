@@ -176,7 +176,7 @@ public class AuthController {
     }
 
     public String getUserLoginName(User user) {
-        if (!user.getRole().getCode().toUpperCase().equals(SecurityUtil.ROLE_CUSTOMER)) {
+        if (!user.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)) {
             EmployeeResponseDTO employee = this.employeeService.handleFetchEmployeeByUserId(user.getId());
             if (employee != null) {
                 return employee.getFullName();

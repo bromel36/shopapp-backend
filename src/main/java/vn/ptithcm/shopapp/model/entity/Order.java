@@ -16,7 +16,6 @@ import java.util.List;
 @Setter
 public class Order extends Base {
 
-    private Instant date;
     private Double totalMoney;
 
     @Enumerated(EnumType.STRING)
