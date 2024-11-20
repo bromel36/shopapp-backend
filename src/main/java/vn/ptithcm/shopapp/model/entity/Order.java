@@ -24,15 +24,14 @@ public class Order extends Base {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
+    private String shippingAddress;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToOne(mappedBy = "order")
     private Invoice invoice;
-
-    @OneToOne(mappedBy = "order")
-    private Shipping shipping;
 
     @OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
     @JsonIgnore

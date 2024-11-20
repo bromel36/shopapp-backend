@@ -4,11 +4,9 @@ package vn.ptithcm.shopapp.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
+import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
 import vn.ptithcm.shopapp.service.IOrderService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
@@ -25,10 +23,26 @@ public class OrderController {
 
 
     @PostMapping("/orders")
-    @ApiMessage("customer place order")
-    public ResponseEntity<OrderResponseDTO> createCustomerOrder(@Valid @RequestBody OrderRequestDTO orderRequest) {
+    @ApiMessage("place order")
+    public ResponseEntity<OrderResponseDTO> createOrder(@Valid @RequestBody OrderRequestDTO orderRequest) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleCreateOrder(orderRequest));
     }
+
+
+    @PutMapping("/orders")
+    @ApiMessage("update order")
+    public ResponseEntity<OrderResponseDTO> updateOrder(@Valid @RequestBody UpdateOrderRequestDTO ordRequest) {
+
+        return ResponseEntity.ok().body(orderService.handleUpdateOrder(ordRequest));
+    }
+
+    @GetMapping("/orders/{id}")
+    @ApiMessage("get order")
+    public ResponseEntity<OrderResponseDTO> getOrder(@PathVariable("id") String id) {
+        return ResponseEntity.ok().body(orderService.handleFetchOrder(id));
+
+    }
+
 
 }
