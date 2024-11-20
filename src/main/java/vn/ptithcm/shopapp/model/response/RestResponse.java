@@ -1,10 +1,16 @@
 package vn.ptithcm.shopapp.model.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class RestResponse<T>  {
     private int statusCode;
+
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String error;
 
     private Object message;
+
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
     private T data;
 
     public int getStatusCode() {
