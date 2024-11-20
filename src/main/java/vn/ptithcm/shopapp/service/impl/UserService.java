@@ -1,5 +1,6 @@
 package vn.ptithcm.shopapp.service.impl;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,6 +17,7 @@ import vn.ptithcm.shopapp.service.IRoleService;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.PaginationUtil;
 import vn.ptithcm.shopapp.util.SecurityUtil;
+import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +25,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IUserService {
+
+    @Value("${ptithcm.avatar.default}")
+    private String defaultAvatar;
 
     private final UserRepository userRepository;
     private final UserConverter userConverter;
@@ -38,7 +43,7 @@ public class UserService implements IUserService {
 
     @Override
     public User handleGetUserByUsername(String username) {
-        return this.userRepository.findByUsername(username);
+        return this.userRepository.findByEmail(username);
     }
 
     @Override
@@ -49,11 +54,11 @@ public class UserService implements IUserService {
 
     @Override
     public User getUserByRefreshTokenAndUsername(String refreshToken, String username) {
-        return this.userRepository.findByRefreshTokenAndUsername(refreshToken, username);
+        return this.userRepository.findByRefreshTokenAndEmail(refreshToken, username);
     }
 
     @Override
-    public UserResponseDTO handleFetchUserById(String id) {
+    public UserResponseDTO handleFetchUserResponseById(String id) {
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("User with id= " + id + " does not exists "));
 
@@ -63,14 +68,19 @@ public class UserService implements IUserService {
     @Override
     public UserResponseDTO handleCreateUser(User user) {
 
-        if (userRepository.existsByUsername(user.getUsername())) {
-            throw new IdInvalidException("Username " + user.getUsername() + " is exist, please try difference username");
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IdInvalidException("Username " + user.getEmail() + " is exist, please try difference username");
         }
 
-        Role role = getExistRole(user);
+        Role role = getExistRole(user.getRole());
+
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
+
+        if(!StringUtil.isValid(user.getAvatar())){
+            user.setAvatar(defaultAvatar);
+        }
         userRepository.save(user);
 
         return userConverter.convertToUserResponseDTO(user);
@@ -82,6 +92,13 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new IdInvalidException("User with id= " + userRequest.getId() + " does not exists "));
 
         user.setActive(userRequest.getActive());
+        user.setFullName(userRequest.getFullName());
+        user.setAddress(userRequest.getAddress());
+        user.setPhone(userRequest.getPhone());
+        user.setGender(userRequest.getGender());
+        user.setBirthday(userRequest.getBirthday());
+        user.setShoppingAddress(userRequest.getShoppingAddress());
+        user.setAvatar(userRequest.getAvatar());
 
         userRepository.save(user);
 
@@ -95,8 +112,9 @@ public class UserService implements IUserService {
         PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable,users);
 
         List<UserResponseDTO> userResponseDTOs = users.getContent().stream()
-                        .map(it->userConverter.convertToUserResponseDTO(it))
-                                .collect(Collectors.toList());
+                        .map(userConverter::convertToUserResponseDTO)
+                        .toList();
+
 
         result.setResult(userResponseDTOs);
 
@@ -112,16 +130,44 @@ public class UserService implements IUserService {
         return handleGetUserByUsername(username);
     }
 
+    public User getUserById(String id){
+        User user = this.userRepository.findById(id)
+                .orElseThrow(() -> new IdInvalidException("User with id= " + id + " does not exists "));
 
-    public Role getExistRole(User user) {
-        if (user.getRole() == null) {
-            throw new IdInvalidException("Role is required");
-        } else if (user.getRole().getId() == null) {
+        return user;
+    }
+
+    @Override
+    public UserResponseDTO handleCustomerRegister(User userRequest) {
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new IdInvalidException("Username " + userRequest.getEmail() + " is exist, please try difference username");
+        }
+
+        Role customerRole = roleService.handldeFetchRoleByCode(SecurityUtil.ROLE_CUSTOMER);
+        if(customerRole!= null){
+            userRequest.setRole(customerRole);
+        }
+
+        userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        userRequest.setActive(true);
+
+        if(!StringUtil.isValid(userRequest.getAvatar())){
+            userRequest.setAvatar(defaultAvatar);
+        }
+
+        userRepository.save(userRequest);
+
+        return userConverter.convertToUserResponseDTO(userRequest);
+    }
+
+
+    public Role getExistRole(Role role) {
+        if (role == null || role.getId() == null) {
             throw new IdInvalidException("Role is required");
         }
 
-        Role role = roleService.handleFetchRoleById(user.getRole().getId());
-        return role;
+        Role roleDB = roleService.handleFetchRoleById(role.getId());
+        return roleDB;
     }
 
 

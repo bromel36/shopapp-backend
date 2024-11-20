@@ -16,7 +16,6 @@ import java.util.List;
 @Setter
 public class Order extends Base {
 
-    private Instant date;
     private Double totalMoney;
 
     @Enumerated(EnumType.STRING)
@@ -25,20 +24,14 @@ public class Order extends Base {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
-    @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    private String shippingAddress;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
-    // cho nay trong db thi de la account_id, employee_id
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToOne(mappedBy = "order")
     private Invoice invoice;
-
-    @OneToOne(mappedBy = "order")
-    private Shipping shipping;
 
     @OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
     @JsonIgnore

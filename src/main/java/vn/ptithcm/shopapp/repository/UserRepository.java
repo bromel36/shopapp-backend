@@ -8,9 +8,9 @@ import vn.ptithcm.shopapp.model.entity.User;
 
 public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
 
-    User findByUsername(String username);
+    User findByEmail(String email);
 
-    User findByRefreshTokenAndUsername(String refreshToken, String username);
+    User findByRefreshTokenAndEmail(String refreshToken, String username);
 
-    boolean existsByUsername(String username);
+    boolean existsByEmail(String username);
 }

@@ -138,6 +138,7 @@ public class CartService implements ICartService {
         List<Product> productDBs = productService.handleFetchAllProductByIds(productIds);
 
         List<ProductQuantityResponse> outOfStockList = new ArrayList<>();
+
         productDBs.forEach(product -> {
             ProductQuantityResponse pqr = new ProductQuantityResponse();
             Integer quantity = requestMap.get(product.getId());
@@ -153,7 +154,6 @@ public class CartService implements ICartService {
             throw new OutOfStockException("There are products that do not meet the required quantity", outOfStockList);
         }
     }
-
 
     public Cart fetchCartByUserAndProduct(Product product, User user) {
         return this.cartRepository.findCartByProductAndUser(product, user);

@@ -4,11 +4,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import vn.ptithcm.shopapp.model.entity.Employee;
 import vn.ptithcm.shopapp.model.entity.Permission;
 import vn.ptithcm.shopapp.model.entity.Role;
 import vn.ptithcm.shopapp.model.entity.User;
-import vn.ptithcm.shopapp.repository.EmployeeRepository;
 import vn.ptithcm.shopapp.repository.PermissionRepository;
 import vn.ptithcm.shopapp.repository.RoleRepository;
 import vn.ptithcm.shopapp.repository.UserRepository;
@@ -23,17 +21,15 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmployeeRepository employeeRepository;
 
     private final String INITIAL_PASSWORD = "123456";
     private final String INITIAL_ROLE = "SUPER_ADMIN";
 
-    public DatabaseInitializer(PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, EmployeeRepository employeeRepository) {
+    public DatabaseInitializer(PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.permissionRepository = permissionRepository;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.employeeRepository = employeeRepository;
     }
 
     @Transactional
@@ -62,16 +58,27 @@ public class DatabaseInitializer implements CommandLineRunner {
             adminRole.setName("Admin role - full permissions");
             adminRole.setPermissions(allPermissions);
 
-            this.roleRepository.save(adminRole);
+            Role customerRole = new Role();
+
+            customerRole.setCode("CUSTOMER");
+
+            customerRole.setName("Customer role");
+
+            List<Role> toCreateRoles = new ArrayList<>();
+            toCreateRoles.add(adminRole);
+            toCreateRoles.add(customerRole);
+
+            this.roleRepository.saveAll(toCreateRoles);
 
             System.out.println(">>>>>> Successful initiate role" );
 
         }
         if(userSize == 0){
             User adminUser = new User();
-            adminUser.setUsername("admin@gmail.com");
+            adminUser.setEmail("admin@gmail.com");
             adminUser.setActive(true);
             adminUser.setPassword(this.passwordEncoder.encode(INITIAL_PASSWORD));
+            adminUser.setFullName("I AM SUPER USER");
 
             Role adminRole = this.roleRepository.findByCode(INITIAL_ROLE);
             if (adminRole != null) {
@@ -79,14 +86,6 @@ public class DatabaseInitializer implements CommandLineRunner {
             }
 
             this.userRepository.save(adminUser);
-
-            if(employeeRepository.findByUserId(adminUser.getId()) == null){
-                Employee employee = new Employee();
-                employee.setFullName("I AM SUPER ADMIN");
-                employee.setUser(adminUser);
-
-                employeeRepository.save(employee);
-            }
         }
 
         if (permissionSize > 0 && roleSize > 0 && userSize > 0) {

@@ -23,6 +23,6 @@ public class Invoice extends Base{
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    @JoinColumn(name = "user_id")
+    private User user;
 }

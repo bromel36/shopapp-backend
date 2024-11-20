@@ -29,7 +29,7 @@ public class UserController {
     @GetMapping("/users/{id}")
     @ApiMessage("fetch user by id")
     public ResponseEntity<UserResponseDTO> getUser(@PathVariable("id") String id) {
-        return ResponseEntity.ok(this.userService.handleFetchUserById(id));
+        return ResponseEntity.ok(this.userService.handleFetchUserResponseById(id));
     }
 
 

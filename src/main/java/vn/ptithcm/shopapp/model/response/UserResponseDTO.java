@@ -1,6 +1,8 @@
 package vn.ptithcm.shopapp.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 import vn.ptithcm.shopapp.enums.GenderEnum;
 
@@ -15,6 +17,20 @@ public class UserResponseDTO {
     private String id;
     private String username;
     private Boolean active;
+    private String fullName;
+    private String address;
+    private String email;
+
+    private String phone;
+
+    @Enumerated(EnumType.STRING)
+    private GenderEnum gender;
+
+    private Instant birthday;
+
+    private String shoppingAddress;
+
+    private String avatar;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private RoleResponse role;

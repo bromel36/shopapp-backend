@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.Category;
-import vn.ptithcm.shopapp.model.entity.Role;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.service.ICategoryService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
@@ -51,7 +50,7 @@ public class CategoryController {
 
     @GetMapping("categories")
     @ApiMessage("fetch all categories")
-    public ResponseEntity<PaginationResponseDTO> getCategory(
+    public ResponseEntity<PaginationResponseDTO> getAllCategory(
             @Filter Specification<Category> spec,
             Pageable pageable
     ) {
@@ -59,8 +58,6 @@ public class CategoryController {
 
         return ResponseEntity.ok(paginationResponseDTO);
     }
-
-
 
 
 }

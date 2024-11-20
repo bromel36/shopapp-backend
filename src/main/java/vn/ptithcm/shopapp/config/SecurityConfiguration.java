@@ -43,6 +43,7 @@ public class SecurityConfiguration {
         String[] whiteList ={
                 "/","/api/v1/auth/login","/api/v1/auth/refresh","/api/v1/auth/register",
                 "/storage/**",
+                "/default-avatar.jpg",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/swagger-ui.html"
@@ -54,7 +55,6 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         authz -> authz
                                 .requestMatchers(whiteList).permitAll()
-
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())

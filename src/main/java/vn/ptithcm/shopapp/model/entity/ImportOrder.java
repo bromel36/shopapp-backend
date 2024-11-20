@@ -20,8 +20,8 @@ public class ImportOrder extends Base {
     private Integer total;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    @JoinColumn(name = "user_id")
+    private User user;
 
 
     @ManyToOne

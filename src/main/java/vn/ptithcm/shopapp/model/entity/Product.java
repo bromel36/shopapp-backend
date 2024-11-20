@@ -39,7 +39,10 @@ public class Product extends Base {
     private Double weight;
     private Integer quantity;
 
+    private Integer sold;
+
     private String tag;
+
 
     @ManyToOne
     @JoinColumn(name = "category_id")

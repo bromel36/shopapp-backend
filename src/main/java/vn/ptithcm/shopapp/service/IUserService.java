@@ -13,7 +13,7 @@ public interface IUserService {
 
     User getUserByRefreshTokenAndUsername(String refreshToken, String username);
 
-    UserResponseDTO handleFetchUserById(String id);
+    UserResponseDTO handleFetchUserResponseById(String id);
 
     UserResponseDTO handleCreateUser(User userRequest);
 
@@ -22,4 +22,6 @@ public interface IUserService {
     PaginationResponseDTO handleGetAllUsers(Specification<User> spec, Pageable pageable);
 
     User getUserLogin();
+
+    UserResponseDTO handleCustomerRegister(User userRequest);
 }

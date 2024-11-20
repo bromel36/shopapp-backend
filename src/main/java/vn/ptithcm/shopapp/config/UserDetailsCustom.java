@@ -31,9 +31,9 @@ public class UserDetailsCustom implements UserDetailsService {
             throw new IdInvalidException("User is inactive!!!");
         }
         return new User(
-                myUser.getUsername(),
+                myUser.getEmail(),
                 myUser.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")) // role này tạo cho đủ cái constructorr này thôi chớ không có ý nghĩa
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")) // role này tạo cho đủ cái constructor này thôi chớ không có ý nghĩa
         );
     }
 
