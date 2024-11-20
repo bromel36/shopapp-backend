@@ -32,7 +32,13 @@ public class OrderResponseDTO {
     private Instant createdAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String createdBy;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Instant updatedAt;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String updatedBy;
 
     private UserOrder user;
 
@@ -42,6 +48,7 @@ public class OrderResponseDTO {
     @AllArgsConstructor
     public static class UserOrder{
         private String id;
+        private String email;
     }
 
 

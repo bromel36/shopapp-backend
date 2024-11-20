@@ -1,5 +1,6 @@
 package vn.ptithcm.shopapp.service.impl;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,6 +17,7 @@ import vn.ptithcm.shopapp.service.IRoleService;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.PaginationUtil;
 import vn.ptithcm.shopapp.util.SecurityUtil;
+import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +25,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IUserService {
+
+    @Value("${ptithcm.avatar.default}")
+    private String defaultAvatar;
 
     private final UserRepository userRepository;
     private final UserConverter userConverter;
@@ -53,7 +58,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponseDTO handleFetchUserById(String id) {
+    public UserResponseDTO handleFetchUserResponseById(String id) {
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("User with id= " + id + " does not exists "));
 
@@ -73,6 +78,9 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
 
+        if(!StringUtil.isValid(user.getAvatar())){
+            user.setAvatar(defaultAvatar);
+        }
         userRepository.save(user);
 
         return userConverter.convertToUserResponseDTO(user);
@@ -122,6 +130,13 @@ public class UserService implements IUserService {
         return handleGetUserByUsername(username);
     }
 
+    public User getUserById(String id){
+        User user = this.userRepository.findById(id)
+                .orElseThrow(() -> new IdInvalidException("User with id= " + id + " does not exists "));
+
+        return user;
+    }
+
     @Override
     public UserResponseDTO handleCustomerRegister(User userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
@@ -135,6 +150,10 @@ public class UserService implements IUserService {
 
         userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         userRequest.setActive(true);
+
+        if(!StringUtil.isValid(userRequest.getAvatar())){
+            userRequest.setAvatar(defaultAvatar);
+        }
 
         userRepository.save(userRequest);
 
