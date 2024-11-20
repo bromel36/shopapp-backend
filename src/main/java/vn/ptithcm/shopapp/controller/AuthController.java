@@ -65,12 +65,15 @@ public class AuthController {
         LoginResponseDTO result = new LoginResponseDTO();
 
         if (currentUserDB != null) {
+
             LoginResponseDTO.UserLoginResponseDTO userLogin
                     = new LoginResponseDTO.UserLoginResponseDTO(
                     currentUserDB.getId(),
                     currentUserDB.getEmail(),
                     currentUserDB.getFullName(),
-                    currentUserDB.getRole()
+                    currentUserDB.getAvatar(),
+                    currentUserDB.getPhone(),
+                    new LoginResponseDTO.RoleLoginResponse(currentUserDB.getRole().getCode())
             );
             result.setUser(userLogin);
         }
@@ -143,7 +146,9 @@ public class AuthController {
                     currentUserDB.getId(),
                     currentUserDB.getEmail(),
                     currentUserDB.getFullName(),
-                    currentUserDB.getRole()
+                    currentUserDB.getAvatar(),
+                    currentUserDB.getPhone(),
+                    new LoginResponseDTO.RoleLoginResponse(currentUserDB.getRole().getCode())
             );
             responseLoginDTO.setUser(userLogin);
         }

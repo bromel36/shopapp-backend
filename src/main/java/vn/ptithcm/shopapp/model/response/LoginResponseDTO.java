@@ -6,7 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.ptithcm.shopapp.model.entity.Role;
+
+import javax.management.relation.Role;
 
 @Getter
 @Setter
@@ -24,9 +25,11 @@ public class LoginResponseDTO {
     @AllArgsConstructor
     public static class UserLoginResponseDTO {
         private String id;
-        private String username;
-        private String name;
-        private Role role;
+        private String email;
+        private String fullName;
+        private String avatar;
+        private String phone;
+        private RoleLoginResponse role;
     }
 
 
@@ -36,7 +39,17 @@ public class LoginResponseDTO {
     @AllArgsConstructor
     public static class UserInsideToken {
         private String id;
-        private String username;
-        private String name;
+        private String email;
+        private String fullName;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RoleLoginResponse {
+        private String code;
+    }
+
+
 }
