@@ -1,6 +1,7 @@
 package vn.ptithcm.shopapp.controller;
 
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,15 +26,9 @@ public class OrderController {
 
     @PostMapping("/orders")
     @ApiMessage("customer place order")
-    public ResponseEntity<OrderResponseDTO> createCustomerOrder(@RequestBody OrderRequestDTO orderRequest) {
+    public ResponseEntity<OrderResponseDTO> createCustomerOrder(@Valid @RequestBody OrderRequestDTO orderRequest) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleCreateCustomerOrder(orderRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleCreateOrder(orderRequest));
     }
 
-    @PostMapping("/admin/orders")
-    @ApiMessage("employee create order")
-    public ResponseEntity<OrderResponseDTO> createEmployeeOrder(@RequestBody OrderRequestDTO orderRequest) {
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleEmployeeCreateOrder(orderRequest));
-    }
 }

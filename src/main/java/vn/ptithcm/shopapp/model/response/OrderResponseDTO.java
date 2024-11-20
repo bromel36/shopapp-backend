@@ -34,23 +34,15 @@ public class OrderResponseDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Instant updatedAt;
 
-    OrderResponseDTO.CustomerOrder customer;
-    OrderResponseDTO.EmployeeOrder employee;
+    private UserOrder user;
 
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CustomerOrder{
+    public static class UserOrder{
         private String id;
     }
 
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class EmployeeOrder{
-        private String id;
-    }
 }
