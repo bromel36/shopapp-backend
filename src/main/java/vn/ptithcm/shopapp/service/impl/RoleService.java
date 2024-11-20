@@ -97,4 +97,9 @@ public class RoleService implements IRoleService {
                 .orElseThrow(() -> new IdInvalidException("Role not found with id = " + id));
         return role;
     }
+
+    @Override
+    public Role handldeFetchRoleByCode(String code) {
+        return this.roleRepository.findByCode(code);
+    }
 }

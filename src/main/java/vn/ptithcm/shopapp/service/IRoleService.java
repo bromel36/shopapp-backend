@@ -16,4 +16,6 @@ public interface IRoleService {
     PaginationResponseDTO handleGetAllRoles(Specification<Role> spec, Pageable pageable);
 
     Role handleFetchRoleById(String id);
+
+    Role handldeFetchRoleByCode(String code);
 }

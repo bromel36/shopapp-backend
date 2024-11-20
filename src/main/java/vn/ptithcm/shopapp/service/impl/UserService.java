@@ -38,7 +38,7 @@ public class UserService implements IUserService {
 
     @Override
     public User handleGetUserByUsername(String username) {
-        return this.userRepository.findByUsername(username);
+        return this.userRepository.findByEmail(username);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class UserService implements IUserService {
 
     @Override
     public User getUserByRefreshTokenAndUsername(String refreshToken, String username) {
-        return this.userRepository.findByRefreshTokenAndUsername(refreshToken, username);
+        return this.userRepository.findByRefreshTokenAndEmail(refreshToken, username);
     }
 
     @Override
@@ -63,14 +63,16 @@ public class UserService implements IUserService {
     @Override
     public UserResponseDTO handleCreateUser(User user) {
 
-        if (userRepository.existsByUsername(user.getUsername())) {
-            throw new IdInvalidException("Username " + user.getUsername() + " is exist, please try difference username");
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IdInvalidException("Username " + user.getEmail() + " is exist, please try difference username");
         }
 
-        Role role = getExistRole(user);
+        Role role = getExistRole(user.getRole());
+
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
+
         userRepository.save(user);
 
         return userConverter.convertToUserResponseDTO(user);
@@ -82,6 +84,13 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new IdInvalidException("User with id= " + userRequest.getId() + " does not exists "));
 
         user.setActive(userRequest.getActive());
+        user.setFullName(userRequest.getFullName());
+        user.setAddress(userRequest.getAddress());
+        user.setPhone(userRequest.getPhone());
+        user.setGender(userRequest.getGender());
+        user.setBirthday(userRequest.getBirthday());
+        user.setShoppingAddress(userRequest.getShoppingAddress());
+        user.setAvatar(userRequest.getAvatar());
 
         userRepository.save(user);
 
@@ -95,8 +104,9 @@ public class UserService implements IUserService {
         PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable,users);
 
         List<UserResponseDTO> userResponseDTOs = users.getContent().stream()
-                        .map(it->userConverter.convertToUserResponseDTO(it))
-                                .collect(Collectors.toList());
+                        .map(userConverter::convertToUserResponseDTO)
+                        .toList();
+
 
         result.setResult(userResponseDTOs);
 
@@ -112,16 +122,33 @@ public class UserService implements IUserService {
         return handleGetUserByUsername(username);
     }
 
+    @Override
+    public UserResponseDTO handleCustomerRegister(User userRequest) {
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new IdInvalidException("Username " + userRequest.getEmail() + " is exist, please try difference username");
+        }
 
-    public Role getExistRole(User user) {
-        if (user.getRole() == null) {
-            throw new IdInvalidException("Role is required");
-        } else if (user.getRole().getId() == null) {
+        Role customerRole = roleService.handldeFetchRoleByCode(SecurityUtil.ROLE_CUSTOMER);
+        if(customerRole!= null){
+            userRequest.setRole(customerRole);
+        }
+
+        userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        userRequest.setActive(true);
+
+        userRepository.save(userRequest);
+
+        return userConverter.convertToUserResponseDTO(userRequest);
+    }
+
+
+    public Role getExistRole(Role role) {
+        if (role == null || role.getId() == null) {
             throw new IdInvalidException("Role is required");
         }
 
-        Role role = roleService.handleFetchRoleById(user.getRole().getId());
-        return role;
+        Role roleDB = roleService.handleFetchRoleById(role.getId());
+        return roleDB;
     }
 
 

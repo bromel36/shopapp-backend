@@ -19,7 +19,6 @@ public class InventoryLog extends Base {
     private Integer quantity;
 
 
-
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
@@ -33,7 +32,7 @@ public class InventoryLog extends Base {
     private ImportOrder importOrder;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    @JoinColumn(name = "user_id")
+    private User user;
 }
 
