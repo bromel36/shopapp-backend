@@ -1,6 +1,5 @@
 package vn.ptithcm.shopapp.error;
 
-import vn.ptithcm.shopapp.model.response.CartResponseDTO;
 import vn.ptithcm.shopapp.model.response.ProductQuantityResponse;
 
 import java.util.List;

@@ -40,7 +40,7 @@ public class OrderController {
     @GetMapping("/orders/{id}")
     @ApiMessage("get order")
     public ResponseEntity<OrderResponseDTO> getOrder(@PathVariable("id") String id) {
-        return ResponseEntity.ok().body(orderService.handleFetchOrder(id));
+        return ResponseEntity.ok().body(orderService.handleFetchOrderResponse(id));
 
     }
 

@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.ptithcm.shopapp.enums.OrderStatusEnum;
 import vn.ptithcm.shopapp.enums.PaymentMethodEnum;
-import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
 
 import java.time.Instant;
 
@@ -28,6 +27,8 @@ public class OrderResponseDTO {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
+    private String shippingAddress;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Instant createdAt;
 
@@ -42,6 +43,8 @@ public class OrderResponseDTO {
 
     private UserOrder user;
 
+    private OrderDetailsResponse orderDetails;
+
     @Getter
     @Setter
     @NoArgsConstructor
@@ -51,5 +54,17 @@ public class OrderResponseDTO {
         private String email;
     }
 
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderDetailsResponse{
+        private String id;
+        private Double price;
+        private Integer quantity;
+        private String productName;
+        private String productThumbnail;
+    }
 
 }
