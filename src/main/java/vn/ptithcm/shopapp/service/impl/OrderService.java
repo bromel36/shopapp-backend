@@ -11,11 +11,8 @@ import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
 import vn.ptithcm.shopapp.repository.OrderRepository;
 import vn.ptithcm.shopapp.repository.PaymentRepository;
 import vn.ptithcm.shopapp.repository.ProductRepository;
-import vn.ptithcm.shopapp.repository.UserRepository;
 import vn.ptithcm.shopapp.service.IOrderService;
-import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.SecurityUtil;
-import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +58,7 @@ public class OrderService implements IOrderService {
 
         Order order = saveOrder(orderRequest, userOrder);
 
-        savePayment(orderRequest,order);
+        savePayment(orderRequest, order);
 
         processOrderDetails(orderRequest, order);
 
@@ -76,7 +73,17 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public OrderResponseDTO handleFetchOrder(String id) {
+    public Order handleFetchOrder(String id) {
+        Order orderDB = orderRepository.findById(id)
+                .orElseThrow(() -> new IdInvalidException("Order with id " + id + " not found"));
+
+        return orderDB;
+    }
+
+    @Override
+    public OrderResponseDTO handleFetchOrderResponse(String id) {
+        Order orderResponse = handleFetchOrder(id);
+
         return null;
     }
 
