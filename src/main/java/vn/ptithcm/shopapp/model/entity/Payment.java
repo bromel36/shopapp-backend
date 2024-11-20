@@ -8,14 +8,11 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
-
 @Entity
 @Table(name = "payments")
 @Getter
 @Setter
-public class Payment extends Base{
-    private Instant date;
+public class Payment extends Base {
     private Double amountPaid;
 
 

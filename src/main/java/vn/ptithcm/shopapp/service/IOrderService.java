@@ -5,7 +5,6 @@ import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
 
 public interface IOrderService {
 
-    OrderResponseDTO handleCreateCustomerOrder(OrderRequestDTO orderRequest);
 
-    OrderResponseDTO handleEmployeeCreateOrder(OrderRequestDTO orderRequest);
+    OrderResponseDTO handleCreateOrder(OrderRequestDTO orderRequest);
 }
