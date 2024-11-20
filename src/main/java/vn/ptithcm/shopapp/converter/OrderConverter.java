@@ -21,23 +21,23 @@ public class OrderConverter {
         return order;
     }
 
-    public OrderResponseDTO convertToOrderResponseDTO(Order order){
-        OrderResponseDTO dto = modelMapper.map(order, OrderResponseDTO.class);
-
-        if(order.getCustomer()!= null){
-            OrderResponseDTO.CustomerOrder customerOrder = new OrderResponseDTO.CustomerOrder();
-
-            customerOrder.setId(order.getCustomer().getId());
-            dto.setCustomer(customerOrder);
-        }
-
-        if(order.getEmployee()!= null){
-            OrderResponseDTO.EmployeeOrder employeeOrder = new OrderResponseDTO.EmployeeOrder();
-            employeeOrder.setId(order.getEmployee().getId());
-            dto.setEmployee(employeeOrder);
-        }
-
-        return dto;
-    }
+//    public OrderResponseDTO convertToOrderResponseDTO(Order order){
+//        OrderResponseDTO dto = modelMapper.map(order, OrderResponseDTO.class);
+//
+//        if(order.getCustomer()!= null){
+//            OrderResponseDTO.CustomerOrder customerOrder = new OrderResponseDTO.CustomerOrder();
+//
+//            customerOrder.setId(order.getCustomer().getId());
+//            dto.setCustomer(customerOrder);
+//        }
+//
+//        if(order.getEmployee()!= null){
+//            OrderResponseDTO.EmployeeOrder employeeOrder = new OrderResponseDTO.EmployeeOrder();
+//            employeeOrder.setId(order.getEmployee().getId());
+//            dto.setEmployee(employeeOrder);
+//        }
+//
+//        return dto;
+//    }
 
 }

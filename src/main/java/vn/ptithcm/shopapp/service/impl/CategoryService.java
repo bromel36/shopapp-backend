@@ -6,7 +6,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.Category;
-import vn.ptithcm.shopapp.model.entity.Role;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.repository.CategoryRepository;
 import vn.ptithcm.shopapp.service.ICategoryService;
@@ -23,7 +22,7 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public Category handleCreateCategory(Category category) {
-        if(isExistsCode(category.getCode())) {
+        if (isExistsCode(category.getCode())) {
             throw new IdInvalidException("Cate with code " + category.getCode() + " already exists");
         }
         return categoryRepository.save(category);
@@ -33,7 +32,7 @@ public class CategoryService implements ICategoryService {
     public Category handleUpdateCategory(Category category) {
         Category categoryDB = handleFetchCategoryById(category.getId());
 
-        if(!category.getCode().equals(categoryDB.getCode()) && isExistsCode(category.getCode())) {
+        if (!category.getCode().equals(categoryDB.getCode()) && isExistsCode(category.getCode())) {
             throw new IdInvalidException("Category with code " + category.getCode() + " already exists");
         }
         categoryDB.setCode(category.getCode());
@@ -46,20 +45,20 @@ public class CategoryService implements ICategoryService {
     public void handleDeleteCategory(String id) {
         Category category = handleFetchCategoryById(id);
 
-        if(category.getProducts() != null && !category.getProducts().isEmpty()) {
+        if (category.getProducts() != null && !category.getProducts().isEmpty()) {
             throw new IdInvalidException("Category with id " + id + " has already products");
         }
 
         categoryRepository.delete(category);
     }
 
-    public boolean isExistsCode(String code){
+    public boolean isExistsCode(String code) {
         return this.categoryRepository.existsByCode(code);
     }
 
     public Category handleFetchCategoryById(String id) {
         Category categoryDB = categoryRepository.findById(id)
-                .orElseThrow(()-> new IdInvalidException("Category with id " + id + " does not exist"));
+                .orElseThrow(() -> new IdInvalidException("Category with id " + id + " does not exist"));
 
         return categoryDB;
     }

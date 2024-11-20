@@ -3,10 +3,7 @@ package vn.ptithcm.shopapp.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -16,11 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.LoginRequestDTO;
-import vn.ptithcm.shopapp.model.response.CustomerResponseDTO;
-import vn.ptithcm.shopapp.model.response.EmployeeResponseDTO;
 import vn.ptithcm.shopapp.model.response.LoginResponseDTO;
-import vn.ptithcm.shopapp.service.ICustomerService;
-import vn.ptithcm.shopapp.service.IEmployeeService;
+import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
@@ -32,29 +26,21 @@ public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
     private final IUserService userService;
-    private final ICustomerService customerService;
-    private final IEmployeeService employeeService;
 
 
     @Value("${ptithcm.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
 
-    private final String ANONYMOUS = "ANONYMOUS";
-
-
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, IUserService userService, ICustomerService customerService, IEmployeeService employeeService) {
+    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, IUserService userService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
-        this.customerService = customerService;
-        this.employeeService = employeeService;
     }
 
     @PostMapping("/auth/login")
     @ApiMessage("success login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginDTO) {
-
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getUsername(),
@@ -79,12 +65,11 @@ public class AuthController {
         LoginResponseDTO result = new LoginResponseDTO();
 
         if (currentUserDB != null) {
-            String name = getUserLoginName(currentUserDB);
             LoginResponseDTO.UserLoginResponseDTO userLogin
                     = new LoginResponseDTO.UserLoginResponseDTO(
                     currentUserDB.getId(),
-                    currentUserDB.getUsername(),
-                    name,
+                    currentUserDB.getEmail(),
+                    currentUserDB.getFullName(),
                     currentUserDB.getRole()
             );
             result.setUser(userLogin);
@@ -116,8 +101,8 @@ public class AuthController {
     @PostMapping("/auth/logout")
     @ApiMessage("Logout user")
     public ResponseEntity<Void> logout() {
-        String username = SecurityUtil.getCurrentUserLogin().orElse("");
-        User currentUser = userService.handleGetUserByUsername(username);
+
+        User currentUser = userService.getUserLogin();
 
         if (currentUser != null) {
             this.userService.updateUserRefreshToken(currentUser, null);
@@ -128,12 +113,12 @@ public class AuthController {
         throw new IdInvalidException("Logout user is invalid!!!");
     }
 
-//    @PostMapping("/auth/register")
-//    @ApiMessage("User register account")
-//    public ResponseEntity<UserResponseDTO> register(@RequestBody User userRequest){
-//        UserResponseDTO userCreated = userService.handleUserCreate(userRequest);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
-//    }
+    @PostMapping("/auth/register")
+    @ApiMessage("User register account")
+    public ResponseEntity<UserResponseDTO> register(@RequestBody User userRequest){
+        UserResponseDTO customerRegister = userService.handleCustomerRegister(userRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerRegister);
+    }
 
 
     public ResponseCookie createCookie(String refreshToken, long maxAge) {
@@ -152,13 +137,12 @@ public class AuthController {
 
 
         if (currentUserDB != null) {
-            String name = getUserLoginName(currentUserDB);
 
             LoginResponseDTO.UserLoginResponseDTO userLogin
                     = new LoginResponseDTO.UserLoginResponseDTO(
                     currentUserDB.getId(),
-                    currentUserDB.getUsername(),
-                    name,
+                    currentUserDB.getEmail(),
+                    currentUserDB.getFullName(),
                     currentUserDB.getRole()
             );
             responseLoginDTO.setUser(userLogin);
@@ -173,20 +157,5 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, createCookie(refreshToken, refreshTokenExpiration).toString())
                 .body(responseLoginDTO);
-    }
-
-    public String getUserLoginName(User user) {
-        if (!user.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)) {
-            EmployeeResponseDTO employee = this.employeeService.handleFetchEmployeeByUserId(user.getId());
-            if (employee != null) {
-                return employee.getFullName();
-            }
-        } else {
-            CustomerResponseDTO customer = this.customerService.handleFetchCustomerByUserId(user.getId());
-            if (customer != null) {
-                return customer.getFullName();
-            }
-        }
-        return ANONYMOUS;
     }
 }
