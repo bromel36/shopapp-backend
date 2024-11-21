@@ -1,5 +1,6 @@
 package vn.ptithcm.shopapp.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.ptithcm.shopapp.converter.OrderConverter;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 public class OrderService implements IOrderService {
 
@@ -61,7 +63,7 @@ public class OrderService implements IOrderService {
 
         Order order = saveOrder(orderRequest, userOrder);
 
-        savePayment(orderRequest,order);
+        savePayment(orderRequest.getAmountPaid(),order);
 
         processOrderDetails(orderRequest, order);
 
@@ -71,15 +73,28 @@ public class OrderService implements IOrderService {
     @Override
     public OrderResponseDTO handleUpdateOrder(UpdateOrderRequestDTO ordRequest) {
 
+        var order = orderRepository.findById(ordRequest.getId()).orElseThrow(() -> new IdInvalidException(ordRequest.getId()+" not already"));
 
-        return null;
+        orderConverter.updateOrder(order, ordRequest);
+
+        if(ordRequest.getAmountPaid()!= 0  && !userService.getUserLogin().getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)){
+            savePayment(ordRequest.getAmountPaid(), order);
+        }
+
+        orderRepository.save(order);
+
+        return orderConverter.convertToOrderResponseDTO(order);
     }
 
     @Override
     public OrderResponseDTO handleFetchOrder(String id) {
-        return null;
+        var order = orderRepository.findById(id).orElseThrow(() -> new IdInvalidException(id+" not already"));
+        return orderConverter.convertToOrderResponseDTO(order);
     }
 
+    private double getTotalPaid(String orderId) {
+        return paymentRepository.sumPaymentsByOrderId(orderId);
+    }
 
     private void validateOrderRequest(OrderRequestDTO orderRequest) {
         if (orderRequest.getOrderDetails().isEmpty()) {
@@ -104,10 +119,10 @@ public class OrderService implements IOrderService {
         return orderRepository.save(order);
     }
 
-    private void savePayment(OrderRequestDTO orderRequest, Order order) {
+    private void savePayment(double amountPaid, Order order) {
         Payment payment = new Payment();
         payment.setOrder(order);
-        payment.setAmountPaid(orderRequest.getAmountPaid());
+        payment.setAmountPaid(amountPaid);
         paymentRepository.save(payment);
     }
 
