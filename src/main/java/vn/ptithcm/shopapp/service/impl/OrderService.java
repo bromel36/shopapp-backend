@@ -11,9 +11,7 @@ import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
 import vn.ptithcm.shopapp.repository.*;
 import vn.ptithcm.shopapp.service.IOrderService;
-import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.SecurityUtil;
-import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,10 +133,10 @@ public class OrderService implements IOrderService {
                 && !currentUser.getId().equalsIgnoreCase(orderUser.getId())) {
             throw new IdInvalidException("Customers can only order by themselves.");
         }
-        if (!currentUser.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
-                && currentUser.getId().equalsIgnoreCase(orderUser.getId())) {
-            throw new IdInvalidException("Staff are not allowed to order by themselves.");
-        }
+//        if (!currentUser.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
+//                && currentUser.getId().equalsIgnoreCase(orderUser.getId())) {
+//            throw new IdInvalidException("Staff are not allowed to order by themselves.");
+//        }
     }
 
     private Order saveOrder(OrderRequestDTO orderRequest, User userOrder) {

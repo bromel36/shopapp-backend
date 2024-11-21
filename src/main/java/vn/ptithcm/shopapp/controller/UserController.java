@@ -59,8 +59,6 @@ public class UserController {
     }
 
 
-
-
 //    @DeleteMapping("/users/{id}")
 //    @ApiMessage("deleted a user")
 //    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) throws IdInvalidException {
