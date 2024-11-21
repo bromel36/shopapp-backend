@@ -9,15 +9,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import vn.ptithcm.shopapp.converter.ProductConverter;
 import vn.ptithcm.shopapp.error.IdInvalidException;
-import vn.ptithcm.shopapp.model.entity.Category;
-import vn.ptithcm.shopapp.model.entity.Product;
-import vn.ptithcm.shopapp.model.entity.Role;
-import vn.ptithcm.shopapp.model.entity.User;
+import vn.ptithcm.shopapp.model.entity.*;
+import vn.ptithcm.shopapp.model.request.ProductRequestDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
+import vn.ptithcm.shopapp.model.response.ProductResponseDTO;
 import vn.ptithcm.shopapp.repository.ProductRepository;
+import vn.ptithcm.shopapp.service.IBrandService;
 import vn.ptithcm.shopapp.service.ICategoryService;
 import vn.ptithcm.shopapp.service.IProductService;
+import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.PaginationUtil;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 import vn.ptithcm.shopapp.util.StringUtil;
@@ -36,73 +38,65 @@ public class ProductService implements IProductService {
 
     private final ProductRepository productRepository;
     private final ICategoryService categoryService;
-    private final UserService userService;
+    private final IUserService userService;
+    private final IBrandService brandService;
+    private final ProductConverter productConverter;
 
-    public ProductService(ProductRepository productRepository, ICategoryService categoryService, FilterParser filterParser, FilterSpecificationConverter filterSpecificationConverter, FilterBuilder filterBuilder, UserService userService) {
+    public ProductService(ProductRepository productRepository, ICategoryService categoryService, FilterParser filterParser, FilterSpecificationConverter filterSpecificationConverter, FilterBuilder filterBuilder, IUserService userService, IBrandService brandService, ProductConverter productConverter) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
         this.filterParser = filterParser;
         this.filterSpecificationConverter = filterSpecificationConverter;
         this.filterBuilder = filterBuilder;
         this.userService = userService;
+        this.brandService = brandService;
+        this.productConverter = productConverter;
     }
 
     @Override
-    public Product handleCreateProduct(Product product) {
+    public ProductResponseDTO handleCreateProduct(ProductRequestDTO productRequest) {
 
-        if(product.getCategory()==null || !StringUtil.isValid(product.getCategory().getId())) {
-            throw new IdInvalidException("Category must be filled");
-        }
+        Category category = categoryService.handleFetchCategoryById(productRequest.getCategory().getId());
+        Brand brand = brandService.handleFetchBrandById(productRequest.getBrand().getId());
 
-        Category category = categoryService.handleFetchCategoryById(product.getCategory().getId());
+        productRequest.setStatus(true);
+        productRequest.setSold(0);
 
-        product.setCategory(category);
+        Product toSaveProduct = new Product();
+        productConverter.convertToProduct(productRequest, toSaveProduct);
 
-        product.setStatus(true);
-        product.setSold(0);
+        toSaveProduct.setCategory(category);
+        toSaveProduct.setBrand(brand);
 
-        return productRepository.save(product);
+        productRepository.save(toSaveProduct);
+
+        return productConverter.convertToProductResponseDTO(toSaveProduct);
     }
 
     @Override
-    public Product handleUpdateProduct(Product product) {
+    public ProductResponseDTO handleUpdateProduct(ProductRequestDTO product) {
         Product productDB = handleFetchProductById(product.getId());
 
-        if(product.getCategory()==null || !StringUtil.isValid(product.getCategory().getId())) {
-            throw new IdInvalidException("Category must be filled");
-        }
+        product.setSold(productDB.getSold());
+
+        productConverter.convertToProduct(product, productDB);
 
         if(!product.getCategory().getId().equals(productDB.getCategory().getId())) {
             Category category = categoryService.handleFetchCategoryById(product.getCategory().getId());
 
             productDB.setCategory(category);
         }
+        if(!product.getBrand().getId().equals(productDB.getBrand().getId())) {
+            Brand brand = brandService.handleFetchBrandById(product.getBrand().getId());
 
-        productDB.setStatus(product.getStatus());
-
-        productDB.setName(product.getName());
-        productDB.setBrand(product.getBrand());
-        productDB.setModel(product.getModel());
-        productDB.setCpu(product.getCpu());
-        productDB.setRam(product.getRam());
-        productDB.setMemory(product.getMemory());
-        productDB.setMemoryType(product.getMemoryType());
-        productDB.setGpu(product.getGpu());
-        productDB.setScreen(product.getScreen());
-        productDB.setPrice(product.getPrice());
-        productDB.setDescription(product.getDescription());
-        productDB.setThumbnail(product.getThumbnail());
-        productDB.setWeight(product.getWeight());
-        productDB.setQuantity(product.getQuantity()); // cho nay cung ko dung lam, so luong chi thay doi khi nhap hang hoac ban hang, nma set v cho de test
-        productDB.setTag(product.getTag());
-        productDB.setColor(product.getColor());
-        productDB.setPort(product.getPort());
-        productDB.setOs(product.getOs());
-
-        //con cai slider chua lam chua set
+            productDB.setBrand(brand);
+        }
 
 
-        return productRepository.save(productDB);
+        productRepository.save(productDB);
+
+
+        return productConverter.convertToProductResponseDTO(productDB);
     }
 
     @Override
@@ -134,7 +128,11 @@ public class ProductService implements IProductService {
 
         PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable, productPage);
 
-        result.setResult(productPage.getContent());
+        List<Product> products = productPage.getContent();
+
+        List<ProductResponseDTO> responses = products.stream().map(it -> productConverter.convertToProductResponseDTO(it)).toList();
+
+        result.setResult(responses);
 
         return result;
     }
@@ -144,5 +142,9 @@ public class ProductService implements IProductService {
         return productRepository.findByIdIn(ids);
     }
 
+    @Override
+    public ProductResponseDTO handleFetchProductResponseById(String id) {
+        return productConverter.convertToProductResponseDTO(handleFetchProductById(id));
+    }
 
 }
