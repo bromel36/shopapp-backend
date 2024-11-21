@@ -58,6 +58,9 @@ public class ProductService implements IProductService {
 
         product.setCategory(category);
 
+        product.setStatus(true);
+        product.setSold(0);
+
         return productRepository.save(product);
     }
 
@@ -75,6 +78,8 @@ public class ProductService implements IProductService {
             productDB.setCategory(category);
         }
 
+        productDB.setStatus(product.getStatus());
+
         productDB.setName(product.getName());
         productDB.setBrand(product.getBrand());
         productDB.setModel(product.getModel());
@@ -84,14 +89,18 @@ public class ProductService implements IProductService {
         productDB.setMemoryType(product.getMemoryType());
         productDB.setGpu(product.getGpu());
         productDB.setScreen(product.getScreen());
-        productDB.setTouch(product.getTouch());
         productDB.setPrice(product.getPrice());
         productDB.setDescription(product.getDescription());
         productDB.setThumbnail(product.getThumbnail());
-        productDB.setStatus(product.getStatus());
         productDB.setWeight(product.getWeight());
-        productDB.setQuantity(product.getQuantity());
+        productDB.setQuantity(product.getQuantity()); // cho nay cung ko dung lam, so luong chi thay doi khi nhap hang hoac ban hang, nma set v cho de test
         productDB.setTag(product.getTag());
+        productDB.setColor(product.getColor());
+        productDB.setPort(product.getPort());
+        productDB.setOs(product.getOs());
+
+        //con cai slider chua lam chua set
+
 
         return productRepository.save(productDB);
     }
@@ -112,8 +121,6 @@ public class ProductService implements IProductService {
         FilterSpecification<Product> statusSpec =filterSpecificationConverter.convert(filterNode);
 
         Specification<Product> finalSpec = spec.and(statusSpec);
-
-
 
         String username = SecurityUtil.getCurrentUserLogin().orElse(null);
         if(username!=null) {

@@ -1,5 +1,6 @@
 package vn.ptithcm.shopapp.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.ptithcm.shopapp.converter.OrderConverter;
@@ -8,9 +9,7 @@ import vn.ptithcm.shopapp.model.entity.*;
 import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
 import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
-import vn.ptithcm.shopapp.repository.OrderRepository;
-import vn.ptithcm.shopapp.repository.PaymentRepository;
-import vn.ptithcm.shopapp.repository.ProductRepository;
+import vn.ptithcm.shopapp.repository.*;
 import vn.ptithcm.shopapp.service.IOrderService;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 
@@ -21,6 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 public class OrderService implements IOrderService {
 
@@ -31,9 +31,10 @@ public class OrderService implements IOrderService {
     private final OrderDetailRepository orderDetailRepository;
     private final UserService userService;
     private final ProductRepository productRepository;
+    private final OrderDetailReponsitory orderDetailReponsitory;
 
     public OrderService(OrderRepository orderRepository, OrderConverter orderConverter, PaymentRepository paymentRepository, ProductService productService,
-                        OrderDetailRepository orderDetailRepository, UserService userService, ProductRepository productRepository) {
+                        OrderDetailRepository orderDetailRepository, UserService userService, ProductRepository productRepository, OrderDetailReponsitory orderDetailReponsitory) {
         this.orderRepository = orderRepository;
         this.orderConverter = orderConverter;
         this.paymentRepository = paymentRepository;
@@ -41,6 +42,7 @@ public class OrderService implements IOrderService {
         this.orderDetailRepository = orderDetailRepository;
         this.userService = userService;
         this.productRepository = productRepository;
+        this.orderDetailReponsitory = orderDetailReponsitory;
     }
 
 
@@ -58,18 +60,27 @@ public class OrderService implements IOrderService {
 
         Order order = saveOrder(orderRequest, userOrder);
 
-        savePayment(orderRequest, order);
+        savePayment(orderRequest.getAmountPaid(),order);
 
         processOrderDetails(orderRequest, order);
 
-        return orderConverter.convertToOrderResponseDTO(order);
+        return handleFetchOrderResponse(order.getId());
     }
 
     @Override
     public OrderResponseDTO handleUpdateOrder(UpdateOrderRequestDTO ordRequest) {
 
+        var order = orderRepository.findById(ordRequest.getId()).orElseThrow(() -> new IdInvalidException(ordRequest.getId()+" not already"));
 
-        return null;
+        orderConverter.updateOrder(order, ordRequest);
+
+        if(ordRequest.getAmountPaid()!= 0  && !userService.getUserLogin().getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)){
+            savePayment(ordRequest.getAmountPaid(), order);
+        }
+
+        orderRepository.save(order);
+
+        return orderConverter.convertToOrderResponseDTO(order);
     }
 
     @Override
@@ -82,11 +93,34 @@ public class OrderService implements IOrderService {
 
     @Override
     public OrderResponseDTO handleFetchOrderResponse(String id) {
-        Order orderResponse = handleFetchOrder(id);
 
-        return null;
+        var order = orderRepository.findById(id).orElseThrow(() -> new IdInvalidException(id+" not already"));
+        OrderResponseDTO responseDTO = orderConverter.convertToOrderResponseDTO(order);
+
+        List<OrderDetail> orderDetailsList = orderDetailReponsitory.findAllByOderAndProduct(order.getId());
+        List<OrderResponseDTO.OrderDetailsResponse> listOrderDetailsResponse = new ArrayList<>();
+
+        for(OrderDetail orderDetail : orderDetailsList){
+
+            OrderResponseDTO.OrderDetailsResponse orderDetailsResponse = new OrderResponseDTO.OrderDetailsResponse();
+
+             orderDetailsResponse.setId(orderDetail.getId());
+             orderDetailsResponse.setPrice(orderDetail.getPrice());
+             orderDetailsResponse.setQuantity(orderDetail.getQuantity());
+             orderDetailsResponse.setProductName(orderDetail.getProduct().getName());
+             orderDetailsResponse.setProductThumbnail(orderDetail.getProduct().getThumbnail());
+
+             listOrderDetailsResponse.add(orderDetailsResponse);
+        }
+
+        responseDTO.setOrderDetails(listOrderDetailsResponse);
+
+        return responseDTO;
     }
 
+    private double getTotalPaid(String orderId) {
+        return paymentRepository.sumPaymentsByOrderId(orderId);
+    }
 
     private void validateOrderRequest(OrderRequestDTO orderRequest) {
         if (orderRequest.getOrderDetails().isEmpty()) {
@@ -99,10 +133,10 @@ public class OrderService implements IOrderService {
                 && !currentUser.getId().equalsIgnoreCase(orderUser.getId())) {
             throw new IdInvalidException("Customers can only order by themselves.");
         }
-        if (!currentUser.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
-                && currentUser.getId().equalsIgnoreCase(orderUser.getId())) {
-            throw new IdInvalidException("Staff are not allowed to order by themselves.");
-        }
+//        if (!currentUser.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
+//                && currentUser.getId().equalsIgnoreCase(orderUser.getId())) {
+//            throw new IdInvalidException("Staff are not allowed to order by themselves.");
+//        }
     }
 
     private Order saveOrder(OrderRequestDTO orderRequest, User userOrder) {
@@ -111,10 +145,10 @@ public class OrderService implements IOrderService {
         return orderRepository.save(order);
     }
 
-    private void savePayment(OrderRequestDTO orderRequest, Order order) {
+    private void savePayment(double amountPaid, Order order) {
         Payment payment = new Payment();
         payment.setOrder(order);
-        payment.setAmountPaid(orderRequest.getAmountPaid());
+        payment.setAmountPaid(amountPaid);
         paymentRepository.save(payment);
     }
 

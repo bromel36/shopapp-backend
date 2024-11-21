@@ -25,19 +25,22 @@ public class Product extends Base {
     private MemoryTypeEnum memoryType;
 
     private String gpu;
-    private Double screen;
-    private Boolean touch;
+    private String screen;
     private Double price;
 
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
 
     private String thumbnail;
+    private String slider;
 
     private Boolean status;
 
     private Double weight;
     private Integer quantity;
+    private String color;
+    private String port;
+    private String os;
 
     private Integer sold;
 
