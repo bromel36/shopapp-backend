@@ -1,13 +1,16 @@
 package vn.ptithcm.shopapp.controller;
 
 import com.turkraft.springfilter.boot.Filter;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.Product;
+import vn.ptithcm.shopapp.model.request.ProductRequestDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
+import vn.ptithcm.shopapp.model.response.ProductResponseDTO;
 import vn.ptithcm.shopapp.service.IProductService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 
@@ -23,20 +26,20 @@ public class ProductController {
 
     @PostMapping("/products")
     @ApiMessage("create a product")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.productService.handleCreateProduct(product));
+    public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO requestDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.productService.handleCreateProduct(requestDTO));
     }
 
     @PutMapping("/products")
     @ApiMessage("update a product")
-    public ResponseEntity<Product> updateProduct(@RequestBody Product product) {
+    public ResponseEntity<ProductResponseDTO> updateProduct(@Valid @RequestBody ProductRequestDTO product) {
         return ResponseEntity.ok().body(this.productService.handleUpdateProduct(product));
     }
 
     @GetMapping("/products/{id}")
     @ApiMessage("fetch a product")
-    public ResponseEntity<Product> getProduct(@PathVariable("id") String id) {
-        return ResponseEntity.ok().body(productService.handleFetchProductById(id));
+    public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable("id") String id) {
+        return ResponseEntity.ok().body(productService.handleFetchProductResponseById(id));
     }
 
     @GetMapping("/products")
