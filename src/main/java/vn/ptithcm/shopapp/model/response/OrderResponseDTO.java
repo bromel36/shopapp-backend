@@ -11,6 +11,7 @@ import vn.ptithcm.shopapp.enums.OrderStatusEnum;
 import vn.ptithcm.shopapp.enums.PaymentMethodEnum;
 
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -43,7 +44,7 @@ public class OrderResponseDTO {
 
     private UserOrder user;
 
-    private OrderDetailsResponse orderDetails;
+    private List<OrderDetailsResponse> orderDetails;
 
     @Getter
     @Setter
