@@ -13,5 +13,7 @@ public interface IOrderService {
 
     OrderResponseDTO handleUpdateOrder(UpdateOrderRequestDTO ordRequest);
 
-    OrderResponseDTO handleFetchOrder(String id);
+    Order handleFetchOrder(String id);
+
+    OrderResponseDTO handleFetchOrderResponse(String id);
 }

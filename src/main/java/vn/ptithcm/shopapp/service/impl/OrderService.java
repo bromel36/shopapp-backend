@@ -87,7 +87,16 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public OrderResponseDTO handleFetchOrder(String id) {
+    public Order handleFetchOrder(String id) {
+        Order orderDB = orderRepository.findById(id)
+                .orElseThrow(() -> new IdInvalidException("Order with id " + id + " not found"));
+
+        return orderDB;
+    }
+
+    @Override
+    public OrderResponseDTO handleFetchOrderResponse(String id) {
+
         var order = orderRepository.findById(id).orElseThrow(() -> new IdInvalidException(id+" not already"));
         return orderConverter.convertToOrderResponseDTO(order);
     }
