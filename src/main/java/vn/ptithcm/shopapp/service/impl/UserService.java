@@ -98,7 +98,7 @@ public class UserService implements IUserService {
         user.setGender(userRequest.getGender());
         user.setBirthday(userRequest.getBirthday());
         user.setShoppingAddress(userRequest.getShoppingAddress());
-        user.setAvatar(userRequest.getAvatar());
+        user.setAvatar(StringUtil.isValid(userRequest.getAvatar())? userRequest.getAvatar() : defaultAvatar);
 
         userRepository.save(user);
 

@@ -48,5 +48,6 @@ public class UserResponseDTO {
     public static class RoleResponse{
         private String id;
         private String code;
+        private String name;
     }
 }

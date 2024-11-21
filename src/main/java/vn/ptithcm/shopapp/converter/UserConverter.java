@@ -19,7 +19,7 @@ public class UserConverter {
 
         if(user.getRole()!= null){
             UserResponseDTO.RoleResponse roleResponse
-                    = new UserResponseDTO.RoleResponse(user.getRole().getId(),user.getRole().getCode());
+                    = new UserResponseDTO.RoleResponse(user.getRole().getId(),user.getRole().getCode(),user.getRole().getName());
             userResponseDTO.setRole(roleResponse);
         }
         return userResponseDTO;
