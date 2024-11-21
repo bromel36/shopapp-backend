@@ -28,7 +28,7 @@ public class UserResponseDTO {
 
     private Instant birthday;
 
-    private String shoppingAddress;
+    private String shoppingAddress; // phai sua lai la shippingAddress, nào sửa nói Khìn
 
     private String avatar;
 

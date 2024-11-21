@@ -15,7 +15,6 @@ import java.util.List;
 @Setter
 public class Product extends Base {
     private String name;
-    private String brand;
     private String model;
     private String cpu;
     private Integer ram;
@@ -47,9 +46,14 @@ public class Product extends Base {
     private String tag;
 
 
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
 
     @ManyToMany(mappedBy = "products",fetch = FetchType.LAZY)
     @JsonIgnore

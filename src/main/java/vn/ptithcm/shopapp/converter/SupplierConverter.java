@@ -25,7 +25,7 @@ public class SupplierConverter {
 
         List<SupplierResponseDTO.ProductSupplier> productSuppliers = products
                 .stream()
-                .map(it-> new SupplierResponseDTO.ProductSupplier(it.getId(),it.getName(),it.getThumbnail(),it.getBrand()))
+                .map(it-> new SupplierResponseDTO.ProductSupplier(it.getId(),it.getName(),it.getThumbnail(),it.getBrand().getName()))
                 .toList();
 
         result.setProducts(productSuppliers);
