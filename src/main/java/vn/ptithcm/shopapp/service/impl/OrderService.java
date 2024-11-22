@@ -62,7 +62,7 @@ public class OrderService implements IOrderService {
 
         processOrderDetails(orderRequest, order);
 
-        return handleFetchOrderResponse(order.getId());
+        return orderConverter.convertToOrderResponseDTO(order);
     }
 
     @Override
@@ -94,24 +94,6 @@ public class OrderService implements IOrderService {
 
         var order = orderRepository.findById(id).orElseThrow(() -> new IdInvalidException(id+" not already"));
         OrderResponseDTO responseDTO = orderConverter.convertToOrderResponseDTO(order);
-
-        List<OrderDetail> orderDetailsList = orderDetailRepository.findAllByOderAndProduct(order.getId());
-        List<OrderResponseDTO.OrderDetailsResponse> listOrderDetailsResponse = new ArrayList<>();
-
-        for(OrderDetail orderDetail : orderDetailsList){
-
-            OrderResponseDTO.OrderDetailsResponse orderDetailsResponse = new OrderResponseDTO.OrderDetailsResponse();
-
-             orderDetailsResponse.setId(orderDetail.getId());
-             orderDetailsResponse.setPrice(orderDetail.getPrice());
-             orderDetailsResponse.setQuantity(orderDetail.getQuantity());
-             orderDetailsResponse.setProductName(orderDetail.getProduct().getName());
-             orderDetailsResponse.setProductThumbnail(orderDetail.getProduct().getThumbnail());
-
-             listOrderDetailsResponse.add(orderDetailsResponse);
-        }
-
-        responseDTO.setOrderDetails(listOrderDetailsResponse);
 
         return responseDTO;
     }
