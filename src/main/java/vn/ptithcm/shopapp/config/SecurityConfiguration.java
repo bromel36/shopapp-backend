@@ -48,6 +48,11 @@ public class SecurityConfiguration {
                 "/swagger-ui/**",
                 "/swagger-ui.html"
         };
+        String[] anotherWhiteList ={
+                "/api/v1/products/**",
+                "api/v1/brands/**",
+                "api/v1/categories/**"
+        };
 
         http
                 .csrf(c -> c.disable())
@@ -55,6 +60,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         authz -> authz
                                 .requestMatchers(whiteList).permitAll()
+                                .requestMatchers(HttpMethod.GET,anotherWhiteList).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
