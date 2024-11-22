@@ -32,12 +32,16 @@ public class OrderRequestDTO {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
-    @NotNull(message = "Amount paid is required")
-    @Min(value = 0, message = "Amount paid must be at least 0")
     private Double amountPaid;
 
     @NotBlank(message = "Shipping Address is required")
     private String shippingAddress;
+
+    @NotBlank(message = "Customer Name is required")
+    private String name;
+
+    @NotBlank(message = "Customer phone number is required")
+    private String phone;
 
     @NotNull(message = "Order Details is required")
     private List<OrderDetails> orderDetails;
