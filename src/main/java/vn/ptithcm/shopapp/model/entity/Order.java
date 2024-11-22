@@ -26,6 +26,9 @@ public class Order extends Base {
 
     private String shippingAddress;
 
+    private String name;
+    private String phone;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
