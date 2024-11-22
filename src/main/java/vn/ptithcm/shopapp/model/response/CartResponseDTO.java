@@ -13,16 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class CartResponseDTO {
     private Integer quantity;
-    private ProductResponse product;
+    private ProductResponseDTO product;
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ProductResponse{
-        private String id;
-        private String name;
-        private String price;
-        private String thumbnail;
-    }
 }
