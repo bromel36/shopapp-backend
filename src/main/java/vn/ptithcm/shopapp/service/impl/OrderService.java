@@ -31,10 +31,9 @@ public class OrderService implements IOrderService {
     private final OrderDetailRepository orderDetailRepository;
     private final UserService userService;
     private final ProductRepository productRepository;
-    private final OrderDetailReponsitory orderDetailReponsitory;
 
     public OrderService(OrderRepository orderRepository, OrderConverter orderConverter, PaymentRepository paymentRepository, ProductService productService,
-                        OrderDetailRepository orderDetailRepository, UserService userService, ProductRepository productRepository, OrderDetailReponsitory orderDetailReponsitory) {
+                        OrderDetailRepository orderDetailRepository, UserService userService, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.orderConverter = orderConverter;
         this.paymentRepository = paymentRepository;
@@ -42,7 +41,6 @@ public class OrderService implements IOrderService {
         this.orderDetailRepository = orderDetailRepository;
         this.userService = userService;
         this.productRepository = productRepository;
-        this.orderDetailReponsitory = orderDetailReponsitory;
     }
 
 
@@ -97,7 +95,7 @@ public class OrderService implements IOrderService {
         var order = orderRepository.findById(id).orElseThrow(() -> new IdInvalidException(id+" not already"));
         OrderResponseDTO responseDTO = orderConverter.convertToOrderResponseDTO(order);
 
-        List<OrderDetail> orderDetailsList = orderDetailReponsitory.findAllByOderAndProduct(order.getId());
+        List<OrderDetail> orderDetailsList = orderDetailRepository.findAllByOderAndProduct(order.getId());
         List<OrderResponseDTO.OrderDetailsResponse> listOrderDetailsResponse = new ArrayList<>();
 
         for(OrderDetail orderDetail : orderDetailsList){
