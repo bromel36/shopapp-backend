@@ -50,6 +50,4 @@ public class LoginResponseDTO {
     public static class RoleLoginResponse {
         private String code;
     }
-
-
 }
