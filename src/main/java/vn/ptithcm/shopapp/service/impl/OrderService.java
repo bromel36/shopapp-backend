@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.ptithcm.shopapp.converter.OrderConverter;
+import vn.ptithcm.shopapp.enums.OrderStatusEnum;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.*;
 import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
@@ -68,11 +69,27 @@ public class OrderService implements IOrderService {
     @Override
     public OrderResponseDTO handleUpdateOrder(UpdateOrderRequestDTO ordRequest) {
 
-        var order = orderRepository.findById(ordRequest.getId()).orElseThrow(() -> new IdInvalidException(ordRequest.getId()+" not already"));
+        var order = handleFetchOrder(ordRequest.getId());
+
+
+        String currentUserRole = userService.getUserLogin().getRole().getCode();
+
+        if (currentUserRole.equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
+                && (!ordRequest.getStatus().equals(OrderStatusEnum.UNPAID) && !ordRequest.getStatus().equals(OrderStatusEnum.PENDING))) {
+            ordRequest.setStatus(order.getStatus());
+        }
+
+        if((!order.getStatus().equals(OrderStatusEnum.PAID) && !order.getStatus().equals(OrderStatusEnum.PENDING))
+                && !order.getShippingAddress().equals(ordRequest.getShippingAddress())
+                && !order.getPhone().equals(ordRequest.getPhone())
+                && !order.getName().equals(ordRequest.getName())
+            ){
+            throw new IdInvalidException("Can not update shipping information for your status");
+        }
 
         orderConverter.updateOrder(order, ordRequest);
 
-        if(ordRequest.getAmountPaid()!= 0  && !userService.getUserLogin().getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)){
+        if(ordRequest.getAmountPaid()!= null  && !currentUserRole.equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)){
             savePayment(ordRequest.getAmountPaid(), order);
         }
 
@@ -120,6 +137,12 @@ public class OrderService implements IOrderService {
     }
 
     private Order saveOrder(OrderRequestDTO orderRequest, User userOrder) {
+        if(orderRequest.getAmountPaid()== null){
+            orderRequest.setAmountPaid(0.0);
+        }
+        if (orderRequest.getStatus()== null){
+            orderRequest.setStatus(OrderStatusEnum.PENDING);
+        }
         Order order = orderConverter.convertToOrder(orderRequest);
         order.setUser(userOrder);
         return orderRepository.save(order);
@@ -159,6 +182,7 @@ public class OrderService implements IOrderService {
 
             orderDetails.add(orderDetail);
         }
+        order.setOrderDetails(orderDetails);
 
         productRepository.saveAll(products);
         orderDetailRepository.saveAll(orderDetails);

@@ -1,5 +1,8 @@
 package vn.ptithcm.shopapp.model.request;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -17,7 +20,12 @@ public class UpdateOrderRequestDTO {
 
     @NotBlank(message = "Order id is required")
     private String id;
+
+    @Enumerated(EnumType.STRING)
     private OrderStatusEnum status;
     private String shippingAddress;
+    private String name;
+    private String phone;
+
     private Double amountPaid;
 }

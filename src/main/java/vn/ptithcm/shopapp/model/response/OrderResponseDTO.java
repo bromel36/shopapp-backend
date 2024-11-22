@@ -3,6 +3,7 @@ package vn.ptithcm.shopapp.model.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,9 @@ public class OrderResponseDTO {
     private PaymentMethodEnum paymentMethod;
 
     private String shippingAddress;
+    private String name;
+
+    private String phone;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Instant createdAt;
