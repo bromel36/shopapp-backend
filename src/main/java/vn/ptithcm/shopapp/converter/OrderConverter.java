@@ -29,23 +29,23 @@ public class OrderConverter {
     public OrderResponseDTO convertToOrderResponseDTO(Order order) {
         OrderResponseDTO dto = modelMapper.map(order, OrderResponseDTO.class);
 
-        List<OrderDetail> orderDetails = order.getOrderDetails();
-
-        List<OrderResponseDTO.OrderDetailsResponse> orderDetailsResponses = new ArrayList<>();
-
-        orderDetails.forEach(orderDetail -> {
-            OrderResponseDTO.OrderDetailsResponse ordDetails = new OrderResponseDTO.OrderDetailsResponse();
-
-            ordDetails.setId(orderDetail.getId());
-            ordDetails.setQuantity(orderDetail.getQuantity());
-            ordDetails.setPrice(orderDetail.getPrice());
-            ordDetails.setProductName(orderDetail.getProduct().getName());
-            ordDetails.setProductThumbnail(orderDetail.getProduct().getThumbnail());
-
-            orderDetailsResponses.add(ordDetails);
-        });
-
-        dto.setOrderDetails(orderDetailsResponses);
+//        List<OrderDetail> orderDetails = order.getOrderDetails();
+//
+//        List<OrderResponseDTO.OrderDetailsResponse> orderDetailsResponses = new ArrayList<>();
+//
+//        orderDetails.forEach(orderDetail -> {
+//            OrderResponseDTO.OrderDetailsResponse ordDetails = new OrderResponseDTO.OrderDetailsResponse();
+//
+//            ordDetails.setId(orderDetail.getId());
+//            ordDetails.setQuantity(orderDetail.getQuantity());
+//            ordDetails.setPrice(orderDetail.getPrice());
+//            ordDetails.setProductName(orderDetail.getProduct().getName());
+//            ordDetails.setProductThumbnail(orderDetail.getProduct().getThumbnail());
+//
+//            orderDetailsResponses.add(ordDetails);
+//        });
+//
+//        dto.setOrderDetails(orderDetailsResponses);
         return dto;
     }
 
