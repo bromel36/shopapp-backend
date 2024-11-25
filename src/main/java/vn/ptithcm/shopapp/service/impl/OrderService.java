@@ -69,13 +69,14 @@ public class OrderService implements IOrderService {
     @Override
     public OrderResponseDTO handleUpdateOrder(UpdateOrderRequestDTO ordRequest) {
 
-        var order = handleFetchOrder(ordRequest.getId());
+        Order order = handleFetchOrder(ordRequest.getId());
 
 
         String currentUserRole = userService.getUserLogin().getRole().getCode();
 
         if (currentUserRole.equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
-                && (!ordRequest.getStatus().equals(OrderStatusEnum.UNPAID) && !ordRequest.getStatus().equals(OrderStatusEnum.PENDING))) {
+                && (!ordRequest.getStatus().equals(OrderStatusEnum.UNPAID) && !ordRequest.getStatus().equals(OrderStatusEnum.PENDING))
+        ) {
             ordRequest.setStatus(order.getStatus());
         }
 
@@ -99,7 +100,7 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public Order handleFetchOrder(String id) {
+    public Order handleFetchOrder(Long id) {
         Order orderDB = orderRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Order with id " + id + " not found"));
 
@@ -107,7 +108,7 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public OrderResponseDTO handleFetchOrderResponse(String id) {
+    public OrderResponseDTO handleFetchOrderResponse(Long id) {
 
         var order = orderRepository.findById(id).orElseThrow(() -> new IdInvalidException(id+" not already"));
         OrderResponseDTO responseDTO = orderConverter.convertToOrderResponseDTO(order);
@@ -127,7 +128,7 @@ public class OrderService implements IOrderService {
 
     private void validateUserPermissions(User currentUser, User orderUser) {
         if (currentUser.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
-                && !currentUser.getId().equalsIgnoreCase(orderUser.getId())) {
+                && currentUser.getId() != orderUser.getId()) {
             throw new IdInvalidException("Customers can only order by themselves.");
         }
 //        if (!currentUser.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
@@ -137,21 +138,16 @@ public class OrderService implements IOrderService {
     }
 
     private Order saveOrder(OrderRequestDTO orderRequest, User userOrder) {
-        if(orderRequest.getAmountPaid()== null){
-            orderRequest.setAmountPaid(0.0);
-        }
-        if (orderRequest.getStatus()== null){
-            orderRequest.setStatus(OrderStatusEnum.PENDING);
-        }
+
         Order order = orderConverter.convertToOrder(orderRequest);
         order.setUser(userOrder);
         return orderRepository.save(order);
     }
 
-    private void savePayment(double amountPaid, Order order) {
+    private void savePayment(Double amountPaid, Order order) {
         Payment payment = new Payment();
         payment.setOrder(order);
-        payment.setAmountPaid(amountPaid);
+        payment.setAmountPaid(amountPaid != null ? amountPaid : 0.0);
         paymentRepository.save(payment);
     }
 
@@ -162,16 +158,22 @@ public class OrderService implements IOrderService {
 
         List<Product> products = productService.handleFetchAllProductByIds(productIds);
         Map<String, Product> productMap = products.stream()
-                .collect(Collectors.toMap(Base::getId, Function.identity()));
+                .collect(Collectors.toMap(
+                        Product::getId,
+                        it -> it
+                ));
 
         List<OrderDetail> orderDetails = new ArrayList<>();
 
         for (OrderRequestDTO.OrderDetails detail : orderRequest.getOrderDetails()) {
             Product product = productMap.get(detail.getProductId());
+
             if (product.getQuantity() < detail.getQuantity() || !product.getStatus()) {
                 throw new IdInvalidException("Product " + product.getName() + " is out of stock.");
             }
             product.setQuantity(product.getQuantity() - detail.getQuantity());
+            product.setSold(product.getSold() + detail.getQuantity());
+            product.setShouldUpdateAudit(false);
 
             OrderDetail orderDetail = new OrderDetail();
 

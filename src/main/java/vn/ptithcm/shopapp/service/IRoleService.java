@@ -11,11 +11,11 @@ public interface IRoleService {
 
     Role handleUpdateRole(Role role);
 
-    void handleDeleteRole(String id);
+    void handleDeleteRole(Long id);
 
     PaginationResponseDTO handleGetAllRoles(Specification<Role> spec, Pageable pageable);
 
-    Role handleFetchRoleById(String id);
+    Role handleFetchRoleById(Long id);
 
     Role handldeFetchRoleByCode(String code);
 }

@@ -77,7 +77,7 @@ public class SupplierService implements ISupplierService {
     }
 
     @Override
-    public SupplierResponseDTO handleFetchSupplierById(String id) {
+    public SupplierResponseDTO handleFetchSupplierById(Long id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Supplier does not exist"));
 
@@ -98,7 +98,7 @@ public class SupplierService implements ISupplierService {
     }
 
     @Override
-    public void handleDeleteSupplier(String id) {
+    public void handleDeleteSupplier(Long id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Supplier does not exist"));
 

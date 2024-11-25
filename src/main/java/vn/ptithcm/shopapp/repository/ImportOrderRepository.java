@@ -6,6 +6,6 @@ import vn.ptithcm.shopapp.model.entity.ImportOrder;
 
 import java.util.List;
 
-public interface ImportOrderRepository extends JpaRepository<ImportOrder, String>, JpaSpecificationExecutor<ImportOrder> {
+public interface ImportOrderRepository extends JpaRepository<ImportOrder, Long>, JpaSpecificationExecutor<ImportOrder> {
     List<ImportOrder> findByIdIn(List<String> importOderIds);
 }

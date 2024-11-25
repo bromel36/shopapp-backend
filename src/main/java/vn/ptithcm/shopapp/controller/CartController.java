@@ -1,7 +1,6 @@
 package vn.ptithcm.shopapp.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.request.CartRequestDTO;
@@ -59,7 +58,7 @@ public class CartController {
 
     @DeleteMapping("/carts/clear")
     @ApiMessage("clear all cart")
-    public ResponseEntity<Void> removeAllProducts(){
+    public ResponseEntity<Void> removeAllProducts() {
 
         cartService.handleRemoveAllProductsFromCart();
 

@@ -23,7 +23,7 @@ public class BrandService implements IBrandService {
     }
 
     @Override
-    public Brand handleFetchBrandById(String id) {
+    public Brand handleFetchBrandById(Long id) {
         Brand brand = this.brandRepository.findById(id)
                 .orElseThrow(()-> new IdInvalidException("Brand with id "+id+" not found"));
         return brand;

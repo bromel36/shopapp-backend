@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderResponseDTO {
-    private String id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private OrderStatusEnum status;
@@ -55,7 +55,7 @@ public class OrderResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserOrder{
-        private String id;
+        private Long id;
         private String email;
     }
 
@@ -65,7 +65,7 @@ public class OrderResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OrderDetailsResponse{
-        private String id;
+        private Long id;
         private Double price;
         private Integer quantity;
         private String productName;

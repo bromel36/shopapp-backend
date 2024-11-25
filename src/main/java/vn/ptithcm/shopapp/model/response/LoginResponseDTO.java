@@ -24,7 +24,7 @@ public class LoginResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserLoginResponseDTO {
-        private String id;
+        private Long id;
         private String email;
         private String fullName;
         private String avatar;
@@ -38,7 +38,7 @@ public class LoginResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserInsideToken {
-        private String id;
+        private Long id;
         private String email;
         private String fullName;
     }

@@ -11,9 +11,9 @@ public interface ISupplierService {
 
     SupplierResponseDTO handleUpdateSupplier(Supplier supplier);
 
-    SupplierResponseDTO handleFetchSupplierById(String id);
+    SupplierResponseDTO handleFetchSupplierById(Long id);
 
     PaginationResponseDTO handleFetchAllSuppliers(Specification<Supplier> spec, Pageable pageable);
 
-    void handleDeleteSupplier(String id);
+    void handleDeleteSupplier(Long id);
 }

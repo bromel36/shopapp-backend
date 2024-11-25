@@ -36,7 +36,7 @@ public class CategoryController {
 
     @DeleteMapping("categories/{id}")
     @ApiMessage("delete a category")
-    public ResponseEntity<Void> deleteCategory(@PathVariable("id") String id) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable("id") Long id) {
 
         this.categoryService.handleDeleteCategory(id);
         return ResponseEntity.ok(null);
@@ -44,7 +44,7 @@ public class CategoryController {
 
     @GetMapping("categories/{id}")
     @ApiMessage("fetch a category")
-    public ResponseEntity<Category> getCategory(@PathVariable("id") String id) {
+    public ResponseEntity<Category> getCategory(@PathVariable("id") Long id) {
         return ResponseEntity.ok(categoryService.handleFetchCategoryById(id));
     }
 

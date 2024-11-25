@@ -18,7 +18,7 @@ public class PermissionService implements IPermissionService {
     }
 
     @Override
-    public List<Permission> handleFetchPermissionByIds(List<String> permissionIds) {
+    public List<Permission> handleFetchPermissionByIds(List<Long> permissionIds) {
         return this.permissionRepository.findByIdIn(permissionIds);
     }
 }

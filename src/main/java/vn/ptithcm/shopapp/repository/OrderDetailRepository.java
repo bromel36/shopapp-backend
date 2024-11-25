@@ -7,7 +7,7 @@ import vn.ptithcm.shopapp.model.entity.OrderDetail;
 
 import java.util.List;
 
-public interface OrderDetailRepository extends JpaRepository<OrderDetail, String> {
+public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     @Query("SELECT od FROM OrderDetail od JOIN FETCH od.product where od.order.id= :orderId")
     List<OrderDetail> findAllByOderAndProduct(@Param("orderId")String orderId);
 }
