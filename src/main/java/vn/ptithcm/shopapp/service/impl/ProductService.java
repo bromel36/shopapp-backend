@@ -79,18 +79,19 @@ public class ProductService implements IProductService {
 
         product.setSold(productDB.getSold());
 
-        productConverter.convertToProduct(product, productDB);
 
-        if(!product.getCategory().getId().equals(productDB.getCategory().getId())) {
+
+        if(product.getCategory().getId() != productDB.getCategory().getId()) {
             Category category = categoryService.handleFetchCategoryById(product.getCategory().getId());
 
             productDB.setCategory(category);
         }
-        if(!product.getBrand().getId().equals(productDB.getBrand().getId())) {
+        if(product.getBrand().getId() != productDB.getBrand().getId()) {
             Brand brand = brandService.handleFetchBrandById(product.getBrand().getId());
 
             productDB.setBrand(brand);
         }
+        productConverter.convertToProduct(product, productDB);
 
 
         productRepository.save(productDB);

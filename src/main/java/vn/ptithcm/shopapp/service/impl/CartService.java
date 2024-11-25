@@ -1,9 +1,7 @@
 package vn.ptithcm.shopapp.service.impl;
 
-import com.turkraft.springfilter.converter.FilterSpecification;
 import com.turkraft.springfilter.converter.FilterSpecificationConverter;
 import com.turkraft.springfilter.parser.FilterParser;
-import com.turkraft.springfilter.parser.node.FilterNode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.ptithcm.shopapp.converter.CartConverter;
@@ -19,8 +17,6 @@ import vn.ptithcm.shopapp.repository.CartRepository;
 import vn.ptithcm.shopapp.service.ICartService;
 import vn.ptithcm.shopapp.service.IProductService;
 import vn.ptithcm.shopapp.service.IUserService;
-import vn.ptithcm.shopapp.util.SecurityUtil;
-import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,8 +100,7 @@ public class CartService implements ICartService {
             cartDB.setQuantity(cartRequest.getQuantity());
 
             cartRepository.save(cartDB);
-        }
-        else {
+        } else {
             throw new IdInvalidException("Product not found");
         }
 
@@ -118,7 +113,7 @@ public class CartService implements ICartService {
 
         Product product = productService.handleFetchProductById(productId);
 
-        cartRepository.deleteByProductAndUser(product,userDB);
+        cartRepository.deleteByProductAndUser(product, userDB);
     }
 
     @Override
@@ -133,7 +128,7 @@ public class CartService implements ICartService {
     public void handleCheckProductQuantity(List<CartRequestDTO> cartRequests) {
         List<String> productIds = cartRequests.stream().map(it -> it.getProduct().getId()).toList();
 
-        Map<String,Integer> requestMap = convertToMap(cartRequests);
+        Map<String, Integer> requestMap = convertToMap(cartRequests);
 
         List<Product> productDBs = productService.handleFetchAllProductByIds(productIds);
 
@@ -143,14 +138,14 @@ public class CartService implements ICartService {
             ProductQuantityResponse pqr = new ProductQuantityResponse();
             Integer quantity = requestMap.get(product.getId());
 
-            if (product.getQuantity() < quantity){
+            if (product.getQuantity() < quantity) {
                 pqr.setId(product.getId());
                 pqr.setQuantity(product.getQuantity());
                 outOfStockList.add(pqr);
             }
 
         });
-        if(!outOfStockList.isEmpty()){
+        if (!outOfStockList.isEmpty()) {
             throw new OutOfStockException("There are products that do not meet the required quantity", outOfStockList);
         }
     }
@@ -164,6 +159,7 @@ public class CartService implements ICartService {
             throw new IdInvalidException("Cart quantity exceeds product quantity");
         }
     }
+
     public Map<String, Integer> convertToMap(List<CartRequestDTO> cartRequestDTOs) {
         if (cartRequestDTOs == null || cartRequestDTOs.isEmpty()) {
             throw new IllegalArgumentException("List of CartRequestDTO cannot be null or empty");
@@ -175,7 +171,6 @@ public class CartService implements ICartService {
                         cartRequest -> cartRequest.getQuantity()
                 ));
     }
-
 
 
 }

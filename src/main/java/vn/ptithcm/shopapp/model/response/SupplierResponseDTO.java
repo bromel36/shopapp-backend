@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class SupplierResponseDTO {
-    private String id;
+    private Long id;
     private String name;
     private String address;
     private String phone;

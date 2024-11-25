@@ -4,6 +4,7 @@ package vn.ptithcm.shopapp.model.request;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -43,9 +44,11 @@ public class OrderRequestDTO {
     @NotBlank(message = "Customer phone number is required")
     private String phone;
 
+    @Valid
     @NotNull(message = "Order Details is required")
     private List<OrderDetails> orderDetails;
 
+    @Valid
     @NotNull(message = "User is required")
     private OrderRequestUser user;
 
@@ -72,7 +75,7 @@ public class OrderRequestDTO {
     @AllArgsConstructor
     public static class OrderRequestUser{
         @NotNull(message = "Id is required")
-        private String id;
+        private Long id;
     }
 
 }

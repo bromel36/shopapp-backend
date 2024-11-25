@@ -20,7 +20,6 @@ import vn.ptithcm.shopapp.util.SecurityUtil;
 import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -58,7 +57,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponseDTO handleFetchUserResponseById(String id) {
+    public UserResponseDTO handleFetchUserResponseById(Long id) {
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("User with id= " + id + " does not exists "));
 
@@ -78,7 +77,7 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
 
-        if(!StringUtil.isValid(user.getAvatar())){
+        if (!StringUtil.isValid(user.getAvatar())) {
             user.setAvatar(defaultAvatar);
         }
         userRepository.save(user);
@@ -98,7 +97,7 @@ public class UserService implements IUserService {
         user.setGender(userRequest.getGender());
         user.setBirthday(userRequest.getBirthday());
         user.setShoppingAddress(userRequest.getShoppingAddress());
-        user.setAvatar(StringUtil.isValid(userRequest.getAvatar())? userRequest.getAvatar() : defaultAvatar);
+        user.setAvatar(StringUtil.isValid(userRequest.getAvatar()) ? userRequest.getAvatar() : defaultAvatar);
 
         userRepository.save(user);
 
@@ -109,11 +108,11 @@ public class UserService implements IUserService {
     public PaginationResponseDTO handleGetAllUsers(Specification<User> spec, Pageable pageable) {
         Page<User> users = userRepository.findAll(spec, pageable);
 
-        PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable,users);
+        PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable, users);
 
         List<UserResponseDTO> userResponseDTOs = users.getContent().stream()
-                        .map(userConverter::convertToUserResponseDTO)
-                        .toList();
+                .map(userConverter::convertToUserResponseDTO)
+                .toList();
 
 
         result.setResult(userResponseDTOs);
@@ -130,7 +129,7 @@ public class UserService implements IUserService {
         return handleGetUserByUsername(username);
     }
 
-    public User getUserById(String id){
+    public User getUserById(Long id) {
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("User with id= " + id + " does not exists "));
 
@@ -144,14 +143,14 @@ public class UserService implements IUserService {
         }
 
         Role customerRole = roleService.handldeFetchRoleByCode(SecurityUtil.ROLE_CUSTOMER);
-        if(customerRole!= null){
+        if (customerRole != null) {
             userRequest.setRole(customerRole);
         }
 
         userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         userRequest.setActive(true);
 
-        if(!StringUtil.isValid(userRequest.getAvatar())){
+        if (!StringUtil.isValid(userRequest.getAvatar())) {
             userRequest.setAvatar(defaultAvatar);
         }
 
