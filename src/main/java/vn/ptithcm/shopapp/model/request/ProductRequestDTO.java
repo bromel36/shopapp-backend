@@ -66,8 +66,8 @@ public class ProductRequestDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CategoryRequest{
-        @NotBlank(message = "Category is required")
-        private String id;
+        @NotNull(message = "Category is required")
+        private Long id;
     }
 
     @Getter
@@ -75,7 +75,7 @@ public class ProductRequestDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BrandRequest{
-        @NotBlank(message = "Brand is required")
-        private String id;
+        @NotNull(message = "Brand is required")
+        private Long id;
     }
 }

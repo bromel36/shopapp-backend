@@ -11,7 +11,7 @@ import vn.ptithcm.shopapp.model.entity.User;
 
 import java.util.List;
 
-public interface CartRepository extends JpaRepository<Cart, String>, JpaSpecificationExecutor<Cart> {
+public interface CartRepository extends JpaRepository<Cart, Long>, JpaSpecificationExecutor<Cart> {
     Cart findCartByProductAndUser(Product product, User user);
 
     List<Cart> findAllByUser(User userDB);

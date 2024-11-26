@@ -37,7 +37,7 @@ public class RoleService implements IRoleService {
         if (role.getPermissions() != null && !role.getPermissions().isEmpty()) {
             List<Permission> permissions = role.getPermissions();
 
-            List<String> permissionIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
+            List<Long> permissionIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
 
             List<Permission> permissionDB = this.permissionService.handleFetchPermissionByIds(permissionIds);
 
@@ -52,14 +52,14 @@ public class RoleService implements IRoleService {
         Role currentRole = this.roleRepository.findById(role.getId())
                 .orElseThrow(() -> new IdInvalidException("Role not found"));
 
-        if (!currentRole.getCode().equals(role.getCode()) && isExistsCode(role.getCode())) {
+        if (!currentRole.getCode().equalsIgnoreCase(role.getCode()) && isExistsCode(role.getCode())) {
             throw new IdInvalidException("Role Code already exists");
         }
 
         if (role.getPermissions() != null && !role.getPermissions().isEmpty()) {
             List<Permission> permissions = role.getPermissions();
 
-            List<String> permissionIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
+            List<Long> permissionIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
 
             List<Permission> permissionDB = this.permissionService.handleFetchPermissionByIds(permissionIds);
 
@@ -73,7 +73,7 @@ public class RoleService implements IRoleService {
     }
 
     @Override
-    public void handleDeleteRole(String id) {
+    public void handleDeleteRole(Long id) {
         //
     }
 
@@ -92,7 +92,7 @@ public class RoleService implements IRoleService {
         return this.roleRepository.existsByCode(code);
     }
 
-    public Role handleFetchRoleById(String id) {
+    public Role handleFetchRoleById(Long id) {
         Role role = this.roleRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Role not found with id = " + id));
         return role;

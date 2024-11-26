@@ -8,7 +8,7 @@ import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 
 public interface IBrandService {
 
-    Brand handleFetchBrandById(String id);
+    Brand handleFetchBrandById(Long id);
 
     Brand handleCreateBrand(Brand brand);
 

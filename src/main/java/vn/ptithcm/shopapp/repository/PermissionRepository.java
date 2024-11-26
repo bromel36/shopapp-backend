@@ -5,6 +5,6 @@ import vn.ptithcm.shopapp.model.entity.Permission;
 
 import java.util.List;
 
-public interface PermissionRepository extends JpaRepository<Permission, String> {
-    List<Permission> findByIdIn(List<String> permissionIds);
+public interface PermissionRepository extends JpaRepository<Permission, Long> {
+    List<Permission> findByIdIn(List<Long> permissionIds);
 }
