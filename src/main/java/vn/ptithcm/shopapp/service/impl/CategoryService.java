@@ -42,7 +42,7 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
-    public void handleDeleteCategory(String id) {
+    public void handleDeleteCategory(Long id) {
         Category category = handleFetchCategoryById(id);
 
         if (category.getProducts() != null && !category.getProducts().isEmpty()) {
@@ -56,7 +56,7 @@ public class CategoryService implements ICategoryService {
         return this.categoryRepository.existsByCode(code);
     }
 
-    public Category handleFetchCategoryById(String id) {
+    public Category handleFetchCategoryById(Long id) {
         Category categoryDB = categoryRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Category with id " + id + " does not exist"));
 

@@ -10,9 +10,9 @@ public interface ICategoryService {
 
     Category handleUpdateCategory(Category category);
 
-    void handleDeleteCategory(String id);
+    void handleDeleteCategory(Long id);
 
-    Category handleFetchCategoryById(String id);
+    Category handleFetchCategoryById(Long id);
 
     PaginationResponseDTO handleFetchAllCategories(Specification<Category> spec, Pageable pageable);
 }

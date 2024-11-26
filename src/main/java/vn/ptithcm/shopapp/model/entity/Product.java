@@ -6,14 +6,20 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import vn.ptithcm.shopapp.enums.MemoryTypeEnum;
+import vn.ptithcm.shopapp.util.SecurityUtil;
 
+import java.time.Instant;
 import java.util.List;
 
 @Entity
 @Table(name = "products")
 @Getter
 @Setter
-public class Product extends Base {
+public class Product{
+
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Id
+    private String id;
     private String name;
     private String model;
     private String cpu;
@@ -46,6 +52,13 @@ public class Product extends Base {
     private String tag;
 
 
+    private Instant createdAt;
+
+    private Instant updatedAt;
+
+    private String createdBy;
+
+    private String updatedBy;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
@@ -78,4 +91,27 @@ public class Product extends Base {
     @OneToMany(mappedBy = "product",fetch = FetchType.LAZY)
     @JsonIgnore
     private List<InventoryLog> inventoryLogs;
+
+
+    @Transient
+    private Boolean shouldUpdateAudit = true;
+
+    @PrePersist
+    public void handleBeforeInsert(){
+        createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true ?
+                SecurityUtil.getCurrentUserLogin().get()
+                : "";
+        createdAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdate(){
+        if (shouldUpdateAudit){
+            updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true ?
+                    SecurityUtil.getCurrentUserLogin().get()
+                    : "";
+            updatedAt = Instant.now();
+        }
+    }
+
 }

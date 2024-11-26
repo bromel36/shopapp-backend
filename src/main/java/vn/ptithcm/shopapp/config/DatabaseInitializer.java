@@ -37,9 +37,9 @@ public class DatabaseInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println("Initializing Database...");
 
-        Long roleSize = roleRepository.count();
-        Long permissionSize = permissionRepository.count();
-        Long userSize = userRepository.count();
+        long roleSize = roleRepository.count();
+        long permissionSize = permissionRepository.count();
+        long userSize = userRepository.count();
 
 
 //        if(permissionSize == 0){
@@ -55,7 +55,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             adminRole.setCode("SUPER_ADMIN");
 
-            adminRole.setName("Admin role - full permissions");
+            adminRole.setName("Admin role");
             adminRole.setPermissions(allPermissions);
 
             Role customerRole = new Role();
@@ -78,7 +78,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             adminUser.setEmail("admin@gmail.com");
             adminUser.setActive(true);
             adminUser.setPassword(this.passwordEncoder.encode(INITIAL_PASSWORD));
-            adminUser.setFullName("I AM SUPER USER");
+            adminUser.setFullName("I'M SUPER USER");
 
             Role adminRole = this.roleRepository.findByCode(INITIAL_ROLE);
             if (adminRole != null) {

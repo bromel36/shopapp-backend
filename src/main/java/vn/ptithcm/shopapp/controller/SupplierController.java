@@ -35,13 +35,13 @@ public class SupplierController {
 
     @ApiMessage("get a supplier")
     @GetMapping("/suppliers/{id}")
-    public ResponseEntity<SupplierResponseDTO> getSupplier(@PathVariable("id") String id) {
+    public ResponseEntity<SupplierResponseDTO> getSupplier(@PathVariable("id") Long id) {
         return ResponseEntity.ok().body(this.supplierService.handleFetchSupplierById(id));
     }
 
     @ApiMessage("delete a supplier")
     @DeleteMapping("/suppliers/{id}")
-    public ResponseEntity<Void> deleteSupplier(@PathVariable("id") String id) {
+    public ResponseEntity<Void> deleteSupplier(@PathVariable("id") Long id) {
         this.supplierService.handleDeleteSupplier(id);
         return ResponseEntity.ok().body(null);
     }

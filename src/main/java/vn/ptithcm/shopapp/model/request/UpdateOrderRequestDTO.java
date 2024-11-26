@@ -18,8 +18,8 @@ import vn.ptithcm.shopapp.enums.OrderStatusEnum;
 @AllArgsConstructor
 public class UpdateOrderRequestDTO {
 
-    @NotBlank(message = "Order id is required")
-    private String id;
+    @NotNull(message = "Order id is required")
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private OrderStatusEnum status;
@@ -27,5 +27,6 @@ public class UpdateOrderRequestDTO {
     private String name;
     private String phone;
 
+    @Min(value = 1, message = "Amount paid must be at least 1")
     private Double amountPaid;
 }

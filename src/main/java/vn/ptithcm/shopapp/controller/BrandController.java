@@ -11,7 +11,6 @@ import vn.ptithcm.shopapp.model.entity.Brand;
 import vn.ptithcm.shopapp.model.entity.Category;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.service.IBrandService;
-import vn.ptithcm.shopapp.service.ICategoryService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 
 @RestController
@@ -39,7 +38,7 @@ public class BrandController {
 
     @GetMapping("brands/{id}")
     @ApiMessage("fetch a brand")
-    public ResponseEntity<Brand> getBrand(@PathVariable("id") String id) {
+    public ResponseEntity<Brand> getBrand(@PathVariable("id") Long id) {
         return ResponseEntity.ok(brandService.handleFetchBrandById(id));
     }
 
