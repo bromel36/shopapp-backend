@@ -42,7 +42,6 @@ public class ChatService implements IChatService {
 
         PythonApiResponse fields = pythonResponse.getBody();
 
-
         ChatResponse response = new ChatResponse();
 
         response.setMessage(fields.getMessage());
