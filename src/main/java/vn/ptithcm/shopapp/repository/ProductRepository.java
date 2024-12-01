@@ -6,18 +6,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import vn.ptithcm.shopapp.model.entity.Product;
+import vn.ptithcm.shopapp.repository.custom.ProductRepositoryCustom;
 
 import java.util.List;
 
-public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product>, ProductRepositoryCustom {
     List<Product> findByIdIn(List<String> ids);
-
-    @Query("SELECT p FROM Product p WHERE "
-            + "(:tag IS NULL OR p.tag LIKE %:tag%) "
-            + "AND (:brand IS NULL OR p.brand.name LIKE %:brand%) "
-            + "AND (:price IS NULL OR p.price <= :price) "
-            + "ORDER BY p.sold DESC")
-    List<Product> findByCriteria(@Param("tag") String tag, @Param("brand") String brand, @Param("price") Double price, Pageable pageable);
-
-
 }

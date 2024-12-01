@@ -46,21 +46,30 @@ public class ChatService implements IChatService {
 
         response.setMessage(fields.getMessage());
 
-        String brand = fields.getBrand();
-        String price = fields.getPrice();
+        List<String> brands = fields.getBrand();
+        List<Double> prices = fields.getPrice();
         String tag = fields.getTag();
 
 
-        if (!StringUtil.isValid(brand) && !StringUtil.isValid(price) && !StringUtil.isValid(tag)) {
+        if (!isValidList(brands) && !isValidList(prices) && !StringUtil.isValid(tag)) {
             return response;
         }
 
-        Pageable pageable = PageRequest.of(0, 5);
-        List<Product> products = productRepository.findByCriteria(tag,brand, Double.valueOf(price), pageable);
-        List<ProductResponseDTO> responseDTOS = products.stream().map(it -> productConverter.convertToProductResponseDTO(it)).toList();
+        List<Product> products = productRepository.find(tag,brands, prices);
+//        List<Product> products = productRepository.findByTagContainingIgnoreCaseAndBrandNameInAndPriceInOrderBySoldDesc(tag,brands, prices, pageable);
+        if (!isValidList(products)){
+            response.setMessage("Không có sản phẩm phù hợp với nhu cầu của bạn!");
+        }
+        else{
+            List<ProductResponseDTO> responseDTOS = products.stream().map(it -> productConverter.convertToProductResponseDTO(it)).toList();
 
-        response.setProducts(responseDTOS);
+            response.setProducts(responseDTOS);
+        }
         return response;
+    }
+
+    private boolean isValidList(List list){
+        return list != null && !list.isEmpty();
     }
 }
 
