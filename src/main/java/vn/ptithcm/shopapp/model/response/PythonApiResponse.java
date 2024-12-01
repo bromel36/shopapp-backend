@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,8 +15,8 @@ import lombok.Setter;
 public class PythonApiResponse {
     private String message;
     private String tag;
-    private String brand;
-    private String price;
+    private List<String> brand;
+    private List<Double> price;
 
 }
 
