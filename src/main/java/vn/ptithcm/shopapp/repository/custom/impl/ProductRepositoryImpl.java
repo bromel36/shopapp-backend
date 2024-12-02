@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import vn.ptithcm.shopapp.model.entity.Product;
 import vn.ptithcm.shopapp.repository.custom.ProductRepositoryCustom;
+import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 .max(Double::compareTo)
                 .map(String::valueOf)
                 .orElse(null);
-        System.out.println(price);
+
         StringBuilder sql = new StringBuilder("SELECT  p.* FROM products p ");
         resolveJoinTable(brands, sql);
         StringBuilder where = new StringBuilder(" WHERE 1=1 ");
@@ -38,9 +39,10 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     public void resolveNormalQuery(List<String> brands, String price, String tag, StringBuilder where) {
 
         if (price != null) {
-            where.append(" AND p.price" + " =" + price);
+            Double priceDown = Double.valueOf(price) - 1000000;
+            where.append(" AND ( p.price BETWEEN " + priceDown.toString() + " AND " + price + ") ");
         }
-        if (tag != null) {
+        if (StringUtil.isValid(tag)) {
             where.append(" AND p.tag" + " like '%" + tag + "%' ");
         }
         if (brands != null && brands.size() > 0) {
