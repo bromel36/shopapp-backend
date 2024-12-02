@@ -38,7 +38,8 @@ public class ChatService implements IChatService {
     public ChatResponse handleMessage(String message) {
         // Gọi API Python
         String pythonApiUrl = "http://localhost:5000/get?msg=" + message;
-        ResponseEntity<PythonApiResponse> pythonResponse = restTemplate.exchange(pythonApiUrl, HttpMethod.GET, null, PythonApiResponse.class);
+        ResponseEntity<PythonApiResponse> pythonResponse = restTemplate
+                .exchange(pythonApiUrl, HttpMethod.GET, null, PythonApiResponse.class);
 
         PythonApiResponse fields = pythonResponse.getBody();
 
@@ -56,12 +57,13 @@ public class ChatService implements IChatService {
         }
 
         List<Product> products = productRepository.find(tag,brands, prices);
-//        List<Product> products = productRepository.findByTagContainingIgnoreCaseAndBrandNameInAndPriceInOrderBySoldDesc(tag,brands, prices, pageable);
         if (!isValidList(products)){
             response.setMessage("Không có sản phẩm phù hợp với nhu cầu của bạn!");
         }
         else{
-            List<ProductResponseDTO> responseDTOS = products.stream().map(it -> productConverter.convertToProductResponseDTO(it)).toList();
+            List<ProductResponseDTO> responseDTOS = products
+                    .stream()
+                    .map(it -> productConverter.convertToProductResponseDTO(it)).toList();
 
             response.setProducts(responseDTOS);
         }
