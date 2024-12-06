@@ -10,6 +10,7 @@ import vn.ptithcm.shopapp.converter.UserConverter;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.Role;
 import vn.ptithcm.shopapp.model.entity.User;
+import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.repository.UserRepository;
@@ -157,6 +158,26 @@ public class UserService implements IUserService {
         userRepository.save(userRequest);
 
         return userConverter.convertToUserResponseDTO(userRequest);
+    }
+
+    @Override
+    public void handleChangePassword(ChangePasswordDTO changePasswordDTO) {
+        User user = getUserLogin();
+
+        if (changePasswordDTO.getOldPassword().equals(changePasswordDTO.getNewPassword())){
+            throw new IdInvalidException("New password must different from old password");
+        }
+
+        boolean isMatched = passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword());
+
+
+        if(!isMatched){
+            throw new IdInvalidException("Your old password is incorrect!!!");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+
+        userRepository.save(user);
     }
 
 
