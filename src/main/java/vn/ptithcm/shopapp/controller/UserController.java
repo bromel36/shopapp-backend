@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.User;
+import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.IUserService;
@@ -57,6 +58,16 @@ public class UserController {
 
         return ResponseEntity.ok(userResponseDTO);
     }
+
+    @PostMapping("/users/change-password")
+    @ApiMessage("change password success")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO){
+        this.userService.handleChangePassword(changePasswordDTO);
+
+        return ResponseEntity.ok(null);
+    }
+
+
 
 
 //    @DeleteMapping("/users/{id}")
