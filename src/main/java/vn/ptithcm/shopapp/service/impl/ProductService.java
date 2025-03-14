@@ -24,7 +24,9 @@ import vn.ptithcm.shopapp.util.PaginationUtil;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 import vn.ptithcm.shopapp.util.StringUtil;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -146,6 +148,18 @@ public class ProductService implements IProductService {
     @Override
     public ProductResponseDTO handleFetchProductResponseById(String id) {
         return productConverter.convertToProductResponseDTO(handleFetchProductById(id));
+    }
+
+    public Map<String, List<String>> getTop7DistinctProductFeatures() {
+        Map<String, List<String>> result = new HashMap<>();
+
+        result.put("cpu", productRepository.findTop7DistinctCpuOrderBySoldDesc());
+        result.put("gpu", productRepository.findTop7DistinctGpuOrderBySoldDesc());
+        result.put("ram", productRepository.findTop7DistinctRamOrderBySoldDesc());
+        result.put("model", productRepository.findTop7DistinctModelOrderBySoldDesc());
+        result.put("screen", productRepository.findTop7DistinctScreenOrderBySoldDesc());
+
+        return result;
     }
 
 }
