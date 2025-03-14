@@ -12,4 +12,19 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product>, ProductRepositoryCustom {
     List<Product> findByIdIn(List<String> ids);
+
+    @Query(value = "SELECT DISTINCT p.cpu FROM products p ORDER BY p.sold DESC LIMIT 7", nativeQuery = true)
+    List<String> findTop7DistinctCpuOrderBySoldDesc();
+
+    @Query(value = "SELECT DISTINCT p.gpu FROM products p ORDER BY p.sold DESC LIMIT 7", nativeQuery = true)
+    List<String> findTop7DistinctGpuOrderBySoldDesc();
+
+    @Query(value = "SELECT DISTINCT p.ram FROM products p ORDER BY p.sold DESC LIMIT 7", nativeQuery = true)
+    List<String> findTop7DistinctRamOrderBySoldDesc();
+
+    @Query(value = "SELECT DISTINCT p.model FROM products p ORDER BY p.sold DESC LIMIT 7", nativeQuery = true)
+    List<String> findTop7DistinctModelOrderBySoldDesc();
+
+    @Query(value = "SELECT DISTINCT p.screen FROM products p ORDER BY p.sold DESC LIMIT 7", nativeQuery = true)
+    List<String> findTop7DistinctScreenOrderBySoldDesc();
 }

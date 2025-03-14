@@ -8,6 +8,7 @@ import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.ProductResponseDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IProductService {
     ProductResponseDTO handleCreateProduct(ProductRequestDTO product);
@@ -21,4 +22,6 @@ public interface IProductService {
     List<Product> handleFetchAllProductByIds(List<String> ids);
 
     ProductResponseDTO handleFetchProductResponseById(String id);
+
+    Map<String, List<String>> getTop7DistinctProductFeatures();
 }

@@ -14,6 +14,9 @@ import vn.ptithcm.shopapp.model.response.ProductResponseDTO;
 import vn.ptithcm.shopapp.service.IProductService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ProductController {
@@ -50,5 +53,11 @@ public class ProductController {
     ) {
         PaginationResponseDTO paginationResponseDTO = productService.handleFetchAllProducts(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
+    }
+
+    @GetMapping("/products/filter")
+    @ApiMessage("get data for config filter")
+    public ResponseEntity<Map<String, List<String>>> getFilter() {
+        return ResponseEntity.ok(productService.getTop7DistinctProductFeatures());
     }
 }
