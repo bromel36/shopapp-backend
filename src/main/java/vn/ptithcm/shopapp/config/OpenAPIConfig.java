@@ -33,9 +33,9 @@ public class OpenAPIConfig {
 
     private Contact createContact() {
         return new Contact()
-                .email("ads.hoidanit@gmail.com")
-                .name("Hỏi Dân IT")
-                .url("https://hoidanit.vn");
+                .email("minhtien4264@gmail.com")
+                .name("Nguyen Minh Tien")
+                .url("");
     }
 
     private License createLicense() {
@@ -47,10 +47,10 @@ public class OpenAPIConfig {
     private Info createApiInfo() {
         return new Info()
                 .title("Shop App API")
-                .version("1.0")
+                .version("1.0.0")
                 .contact(createContact())
-                .description("This API exposes all endpoints (job hunter)")
-                .termsOfService("https://bromel.vn/donate")
+                .description("This API exposes all endpoints")
+                .termsOfService("https://bromel.vn/donate (fake)")
                 .license(createLicense());
     }
 
