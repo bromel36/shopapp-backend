@@ -1,6 +1,15 @@
 package vn.ptithcm.shopapp.service.impl;
 
+import com.turkraft.springfilter.converter.FilterSpecification;
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
+import com.turkraft.springfilter.parser.node.FilterNode;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.ptithcm.shopapp.converter.OrderConverter;
@@ -10,8 +19,10 @@ import vn.ptithcm.shopapp.model.entity.*;
 import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
 import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
+import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.repository.*;
 import vn.ptithcm.shopapp.service.IOrderService;
+import vn.ptithcm.shopapp.util.PaginationUtil;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 
 import java.util.ArrayList;
@@ -23,26 +34,20 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class OrderService implements IOrderService {
 
-    private final OrderRepository orderRepository;
-    private final OrderConverter orderConverter;
-    private final PaymentRepository paymentRepository;
-    private final ProductService productService;
-    private final OrderDetailRepository orderDetailRepository;
-    private final UserService userService;
-    private final ProductRepository productRepository;
+    OrderRepository orderRepository;
+    OrderConverter orderConverter;
+    PaymentRepository paymentRepository;
+    ProductService productService;
+    OrderDetailRepository orderDetailRepository;
+    UserService userService;
+    ProductRepository productRepository;
+    FilterParser filterParser;
+    FilterSpecificationConverter filterSpecificationConverter;
 
-    public OrderService(OrderRepository orderRepository, OrderConverter orderConverter, PaymentRepository paymentRepository, ProductService productService,
-                        OrderDetailRepository orderDetailRepository, UserService userService, ProductRepository productRepository) {
-        this.orderRepository = orderRepository;
-        this.orderConverter = orderConverter;
-        this.paymentRepository = paymentRepository;
-        this.productService = productService;
-        this.orderDetailRepository = orderDetailRepository;
-        this.userService = userService;
-        this.productRepository = productRepository;
-    }
 
 
     @Override
@@ -114,6 +119,32 @@ public class OrderService implements IOrderService {
         OrderResponseDTO responseDTO = orderConverter.convertToOrderResponseDTO(order);
 
         return responseDTO;
+    }
+
+    @Override
+    public PaginationResponseDTO handleFetchOrderByUserId(Long id, Pageable pageable) {
+        User userDB = userService.getUserById(id);
+        if(userDB== null){
+            throw new IdInvalidException("User not found");
+        }
+
+        User currentUserLogin = userService.getUserLogin();
+
+        if(currentUserLogin.getId() != userDB.getId() && currentUserLogin.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)){
+            throw new IdInvalidException("Access denied");
+        }
+        String filter = "user = '" + id + "' ";
+        FilterNode node = filterParser.parse(filter);
+        FilterSpecification<Order>  spec = filterSpecificationConverter.convert(filter);
+
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+
+        PaginationResponseDTO dto = PaginationUtil.handlePaginate(pageable, orders);
+
+        List<OrderResponseDTO> orderResponseDTOS = orders.getContent().stream().map(orderConverter::convertToOrderResponseDTO).toList();
+
+        dto.setResult(orderResponseDTOS);
+        return dto;
     }
 
     private double getTotalPaid(String orderId) {
