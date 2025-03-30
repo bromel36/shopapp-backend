@@ -27,6 +27,9 @@ public class OrderConverter {
         if (dto.getStatus()== null){
             order.setStatus(OrderStatusEnum.PENDING);
         }
+        else{
+            order.setStatus(dto.getStatus());
+        }
         order.setName(dto.getName());
         order.setPhone(dto.getPhone());
         order.setShippingAddress(dto.getShippingAddress());
