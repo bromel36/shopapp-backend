@@ -11,6 +11,7 @@ import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.Role;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
+import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.repository.UserRepository;
@@ -178,6 +179,11 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
 
         userRepository.save(user);
+    }
+
+    @Override
+    public void handleForgotPassword(ForgotPasswordDTO forgotPasswordDTO) {
+
     }
 
 

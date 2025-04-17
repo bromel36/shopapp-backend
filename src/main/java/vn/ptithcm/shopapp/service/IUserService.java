@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
+import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 
@@ -28,4 +29,6 @@ public interface IUserService {
     UserResponseDTO handleCustomerRegister(User userRequest);
 
     void handleChangePassword(@Valid ChangePasswordDTO changePasswordDTO);
+
+    void handleForgotPassword(@Valid ForgotPasswordDTO forgotPasswordDTO);
 }

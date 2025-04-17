@@ -43,9 +43,12 @@ public class User extends Base{
 
     private Instant birthday;
 
-    private String shoppingAddress; // shipping
+    private String shoppingAddress;
 
     private String avatar;
+
+    @Column(columnDefinition = "text")
+    private String resetPasswordToken;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

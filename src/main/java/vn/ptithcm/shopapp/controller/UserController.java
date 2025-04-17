@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
+import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.IUserService;
@@ -67,7 +68,12 @@ public class UserController {
         return ResponseEntity.ok(null);
     }
 
-
+    @PostMapping("/user/forgot-pwd")
+    @ApiMessage("send verify email successfully")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordDTO forgotPasswordDTO){
+        this.userService.handleForgotPassword(forgotPasswordDTO);
+        return ResponseEntity.ok(null);
+    }
 
 
 //    @DeleteMapping("/users/{id}")
