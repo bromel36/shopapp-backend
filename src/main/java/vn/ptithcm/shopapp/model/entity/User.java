@@ -47,8 +47,9 @@ public class User extends Base{
 
     private String avatar;
 
-    @Column(columnDefinition = "text")
-    private String resetPasswordToken;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Token> tokens;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

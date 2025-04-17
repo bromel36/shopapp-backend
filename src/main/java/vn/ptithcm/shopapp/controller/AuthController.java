@@ -2,6 +2,7 @@ package vn.ptithcm.shopapp.controller;
 
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,15 +11,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import vn.ptithcm.shopapp.enums.TokenTypeEnum;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.LoginRequestDTO;
+import vn.ptithcm.shopapp.model.request.ResendVerifyEmailRequestDTO;
 import vn.ptithcm.shopapp.model.response.LoginResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 
+@Slf4j(topic = "AUTH-PROVIDER")
 @RestController
 @RequestMapping("/api/v1")
 public class AuthController {
@@ -27,9 +31,14 @@ public class AuthController {
     private final SecurityUtil securityUtil;
     private final IUserService userService;
 
+    @Value("${ptithcm.jwt.access-token-validity-in-seconds}")
+    private long accessTokenExpiration;
 
     @Value("${ptithcm.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
+
+    @Value("${ptithcm.jwt.verify-token-validity-in-seconds}")
+    private long verifyTokenExpiration;
 
 
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, IUserService userService) {
@@ -90,7 +99,7 @@ public class AuthController {
         if (refreshToken.isBlank()) {
             throw new IdInvalidException("refresh token is required");
         }
-        Jwt decodedJWT = this.securityUtil.checkValidRefreshToken(refreshToken);
+        Jwt decodedJWT = this.securityUtil.checkValidToken(refreshToken);
 
         String email = decodedJWT.getSubject();
 
@@ -117,10 +126,24 @@ public class AuthController {
     }
 
     @PostMapping("/auth/register")
-    @ApiMessage("User register account")
+    @ApiMessage("Created user account and send email to user")
     public ResponseEntity<UserResponseDTO> register(@RequestBody User userRequest){
-        UserResponseDTO customerRegister = userService.handleCustomerRegister(userRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(customerRegister);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.handleCustomerRegister(userRequest, verifyTokenExpiration));
+    }
+
+
+    @GetMapping("/auth/verify-email")
+    @ApiMessage("User verified successfully")
+    public ResponseEntity<String> verify(@RequestParam String token, TokenTypeEnum type){
+
+        return ResponseEntity.ok(userService.handleVerifyUser(token, type));
+    }
+
+    @PostMapping("/auth/resend-verify-email")
+    @ApiMessage("Send email successfully")
+    public ResponseEntity<Void> resend(@Valid @RequestBody ResendVerifyEmailRequestDTO dto){
+        userService.resendEmail(dto, verifyTokenExpiration);
+        return ResponseEntity.ok(null);
     }
 
 
@@ -153,9 +176,9 @@ public class AuthController {
             responseLoginDTO.setUser(userLogin);
         }
 
-        responseLoginDTO.setAccessToken(securityUtil.createAccessToken(username, responseLoginDTO));
+        responseLoginDTO.setAccessToken(securityUtil.createToken(username, responseLoginDTO, accessTokenExpiration));
 
-        String refreshToken = this.securityUtil.createRefreshToken(username, responseLoginDTO);
+        String refreshToken = this.securityUtil.createToken(username, responseLoginDTO, refreshTokenExpiration);
 
         this.userService.updateUserRefreshToken(currentUserDB, refreshToken);
 
