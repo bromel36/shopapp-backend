@@ -180,6 +180,12 @@ public class UserService implements IUserService {
         userRepository.save(user);
     }
 
+    @Override
+    public void handleUserDelete(Long id) {
+        User userDB = this.getUserById(id);
+        userDB.setActive(false);
+    }
+
 
     public Role getExistRole(Role role) {
         if (role == null || role.getId() == null) {

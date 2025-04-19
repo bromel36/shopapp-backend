@@ -28,4 +28,6 @@ public interface IUserService {
     UserResponseDTO handleCustomerRegister(User userRequest);
 
     void handleChangePassword(@Valid ChangePasswordDTO changePasswordDTO);
+
+    void handleUserDelete(Long id);
 }
