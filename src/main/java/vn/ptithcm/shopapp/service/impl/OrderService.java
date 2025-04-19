@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.ptithcm.shopapp.converter.OrderConverter;
@@ -20,6 +21,7 @@ import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
 import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
+import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.repository.*;
 import vn.ptithcm.shopapp.service.IOrderService;
 import vn.ptithcm.shopapp.util.PaginationUtil;
@@ -145,6 +147,18 @@ public class OrderService implements IOrderService {
 
         dto.setResult(orderResponseDTOS);
         return dto;
+    }
+
+    @Override
+    public PaginationResponseDTO handlFetchAllOrders(Specification<Order> spec, Pageable pageable) {
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+
+        PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable, orders);
+
+
+        result.setResult(orders.getContent());
+
+        return result;
     }
 
     private double getTotalPaid(String orderId) {

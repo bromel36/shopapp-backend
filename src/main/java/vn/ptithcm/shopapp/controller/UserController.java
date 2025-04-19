@@ -70,11 +70,11 @@ public class UserController {
 
 
 
-//    @DeleteMapping("/users/{id}")
-//    @ApiMessage("deleted a user")
-//    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) throws IdInvalidException {
-//
-//        this.userService.handleUserDelete(id);
-//        return ResponseEntity.ok(null);
-//    }
+    @DeleteMapping("/users/{id}")
+    @ApiMessage("deleted a user")
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
+
+        this.userService.handleUserDelete(id);
+        return ResponseEntity.ok(null);
+    }
 }
