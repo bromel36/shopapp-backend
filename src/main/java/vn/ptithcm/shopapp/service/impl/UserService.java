@@ -39,11 +39,13 @@ import java.util.Objects;
 @Service
 @Slf4j(topic = "USER-SERVICE")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor
 public class UserService implements IUserService {
 
-    @Value("${ptithcm.avatar.default}")
+
     String defaultAvatar;
+
+    long expirationTime;
+
     UserRepository userRepository;
     UserConverter userConverter;
     PasswordEncoder passwordEncoder;
@@ -51,6 +53,18 @@ public class UserService implements IUserService {
     IEmailService emailService;
     SecurityUtil securityUtil;
     TokenRepository tokenRepository;
+
+    public UserService(@Value("${ptithcm.avatar.default}") String defaultAvatar,@Value("${ptithcm.jwt.verify-token-validity-in-seconds}") long expirationTime, UserRepository userRepository, UserConverter userConverter, PasswordEncoder passwordEncoder, IRoleService roleService, IEmailService emailService, SecurityUtil securityUtil, TokenRepository tokenRepository) {
+        this.defaultAvatar = defaultAvatar;
+        this.expirationTime = expirationTime;
+        this.userRepository = userRepository;
+        this.userConverter = userConverter;
+        this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
+        this.emailService = emailService;
+        this.securityUtil = securityUtil;
+        this.tokenRepository = tokenRepository;
+    }
 
     @Override
     public User handleGetUserByUsername(String username) {
@@ -150,7 +164,7 @@ public class UserService implements IUserService {
 
     @Transactional
     @Override
-    public UserResponseDTO handleCustomerRegister(User userRequest, long expirationTime) {
+    public UserResponseDTO handleCustomerRegister(User userRequest, String clientType) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new IdInvalidException("Username " + userRequest.getEmail() + " is exist, please try difference username");
         }
@@ -177,9 +191,7 @@ public class UserService implements IUserService {
 
         userRepository.save(userRequest);
 
-        emailService.sendVerifyMail(userRequest.getEmail(), "VERIFY YOUR EMAIL",
-                userRequest.getFullName() == null?"":userRequest.getFullName(), verifyToken, token.getType());
-
+        emailService.sendVerifyMail(userRequest,token,clientType);
         return userConverter.convertToUserResponseDTO(userRequest);
     }
 
@@ -205,13 +217,29 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void handleForgotPassword(ForgotPasswordDTO forgotPasswordDTO) {
+    public void handleForgotPassword(ForgotPasswordDTO forgotPasswordDTO, String clientType) {
+        String email = forgotPasswordDTO.getEmail();
+        User userDB = userRepository.findByEmail(email);
 
+        if(userDB == null){
+            throw new IdInvalidException("User not found");
+        }
+
+        String tokenStr = securityUtil.createVerifyToken(email, expirationTime);
+
+        Token token = new Token();
+        token.setType(TokenTypeEnum.RESET_PASSWORD);
+        token.setToken(tokenStr);
+        token.setUser(userDB);
+
+        emailService.sendVerifyMail(userDB, token, clientType);
+
+        tokenRepository.save(token);
     }
 
     @Transactional
     @Override
-    public String handleVerifyUser(String token, TokenTypeEnum type) {
+    public Object handleVerifyUser(String token, TokenTypeEnum type) {
         if(securityUtil.isTokenExpired(token)){
             throw new IdInvalidException("Expired token");
         }
@@ -235,15 +263,23 @@ public class UserService implements IUserService {
             throw new IdInvalidException("Token invalid");
         }
 
-        userDB.setActive(true);
+        if(type == TokenTypeEnum.VERIFIED){
+            userDB.setActive(true);
+        }
+        else if (type == TokenTypeEnum.RESET_PASSWORD){
+
+        }
+
         tokenRepository.delete(contextToken);
         userRepository.save(userDB);
+
+        log.info("User verified");
         return "User verified successfully";
     }
 
     @Transactional
     @Override
-    public void resendEmail(ResendVerifyEmailRequestDTO dto, long expirationTime) {
+    public void resendEmail(ResendVerifyEmailRequestDTO dto, String clientType) {
         User userDB = userRepository.findByEmail(dto.getEmail());
 
         if(userDB == null){
@@ -254,13 +290,13 @@ public class UserService implements IUserService {
 
         String resendToken = securityUtil.createVerifyToken(userDB.getEmail(), expirationTime);
 
-        emailService.sendVerifyMail(userDB.getEmail(), "VERIFY YOUR EMAIL",
-                userDB.getFullName() == null?"":userDB.getFullName(), resendToken, dto.getType());
-
         Token token = new Token();
         token.setToken(resendToken);
         token.setType(dto.getType());
         token.setUser(userDB);
+
+        emailService.sendVerifyMail(userDB, token, clientType);
+
         tokenRepository.save(token);
         log.info("Saved token");
     }

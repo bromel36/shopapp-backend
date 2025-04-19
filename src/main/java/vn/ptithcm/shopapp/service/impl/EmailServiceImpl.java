@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import vn.ptithcm.shopapp.enums.TokenTypeEnum;
+import vn.ptithcm.shopapp.model.entity.Token;
+import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.service.IEmailService;
+import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,7 +35,19 @@ public class EmailServiceImpl implements IEmailService {
     private String logo;
 
     @Value("${spring.sendgrid.verify-api}")
-    private String verifyApi;
+    private String verifyWebLink;
+
+    @Value("${spring.sendgrid.verify-deep-link}")
+    private String verifyDeepLink;
+
+    @Value("${spring.sendgrid.template-verify.id}")
+    private String templateVerifyId;
+
+    @Value("${spring.sendgrid.template-forgot-pwd.id}")
+    private String templateForgotPwdId;
+
+    private String templateId = "";
+
 
 
     public EmailServiceImpl(SendGrid sendGrid, String mailFromStr) {
@@ -70,35 +85,38 @@ public class EmailServiceImpl implements IEmailService {
         }
     }
 
+    public void sendVerifyMail(User user, Token token, String clientType) {
+        log.info("Verify email started for user: {}", user.getEmail());
 
-    public void sendVerifyMail(String to, String subject, String name, String verifyToken, TokenTypeEnum type) {
-        log.info("Verify email started");
+        String name = StringUtil.isValid(user.getFullName()) ? user.getFullName() : "";
 
+        templateId = token.getType() == TokenTypeEnum.RESET_PASSWORD ? templateForgotPwdId : templateVerifyId;
+
+        String verificationLink = (clientType.equalsIgnoreCase(StringUtil.WEB_HEADER)? verifyWebLink : verifyDeepLink)
+                + "?token=" + token.getToken() + "&type=" + token.getType().name();
+
+        sendVerificationEmail(user.getEmail(), StringUtil.EMAIL_SUBJECT, name, verificationLink);
+    }
+
+
+    private void sendVerificationEmail(String to, String subject, String name, String verificationLink) {
         Email mailFrom = new Email(from);
         Email mailTo = new Email(to);
 
-
-        String verificationLink = verifyApi + "?token=" + verifyToken +"&type="+ type.name();
-
-        // Dinh nghia template
-        Map<String, String> maps = new HashMap<>();
-
-        maps.put("verification-link", verificationLink);
-        maps.put("logo", logo);
-        maps.put("name", name);
-        maps.put("subject", subject);
+        Map<String, String> templateData = new HashMap<>();
+        templateData.put("verification-link", verificationLink);
+        templateData.put("logo", logo);
+        templateData.put("name", name);
+        templateData.put("subject", subject);
 
         Personalization personalization = new Personalization();
-
         personalization.addTo(mailTo);
-
-        maps.forEach(personalization::addDynamicTemplateData);
+        templateData.forEach(personalization::addDynamicTemplateData);
 
         Mail mail = new Mail();
         mail.setFrom(mailFrom);
-//        mail.setSubject(subject);
         mail.addPersonalization(personalization);
-        mail.setTemplateId("d-19e92076e6b24c9289e296a79c4653a7");
+        mail.setTemplateId(templateId);
 
         try {
             Request request = new Request();
@@ -109,13 +127,13 @@ public class EmailServiceImpl implements IEmailService {
             Response response = sendGrid.api(request);
 
             if(response.getStatusCode() == 202) {
-                log.info("Send email successfully");
-            }
-            else{
-                log.info("Failed to send email " + response.getBody());
+                log.info("Send email successfully to: {}", to);
+            } else {
+                log.info("Failed to send email: {}", response.getBody());
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("Error sending verification email", e);
+            throw new RuntimeException("Failed to send email", e);
         }
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.enums.TokenTypeEnum;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.User;
+import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
+import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
 import vn.ptithcm.shopapp.model.request.LoginRequestDTO;
 import vn.ptithcm.shopapp.model.request.ResendVerifyEmailRequestDTO;
 import vn.ptithcm.shopapp.model.response.LoginResponseDTO;
@@ -36,10 +38,6 @@ public class AuthController {
 
     @Value("${ptithcm.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
-
-    @Value("${ptithcm.jwt.verify-token-validity-in-seconds}")
-    private long verifyTokenExpiration;
-
 
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, IUserService userService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
@@ -127,22 +125,44 @@ public class AuthController {
 
     @PostMapping("/auth/register")
     @ApiMessage("Created user account and send email to user")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody User userRequest){
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.handleCustomerRegister(userRequest, verifyTokenExpiration));
+    public ResponseEntity<UserResponseDTO> register(
+            @RequestBody User userRequest,
+            @RequestHeader(value = "X-Client-Type", defaultValue = "WEB") String clientType) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.handleCustomerRegister(userRequest, clientType));
+    }
+
+    @PostMapping("/users/change-password")
+    @ApiMessage("change password success")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO){
+        this.userService.handleChangePassword(changePasswordDTO);
+
+        return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("/users/forgot-pwd")
+    @ApiMessage("send verify email successfully")
+    public ResponseEntity<Void> forgotPassword(
+            @Valid @RequestBody ForgotPasswordDTO forgotPasswordDTO,
+            @RequestHeader(value = "X-Client-Type", defaultValue = "WEB") String clientType){
+        this.userService.handleForgotPassword(forgotPasswordDTO, clientType);
+        return ResponseEntity.ok(null);
     }
 
 
     @GetMapping("/auth/verify-email")
     @ApiMessage("User verified successfully")
-    public ResponseEntity<String> verify(@RequestParam String token, TokenTypeEnum type){
+    public ResponseEntity<?> verify(@RequestParam String token, TokenTypeEnum type) {
 
         return ResponseEntity.ok(userService.handleVerifyUser(token, type));
     }
 
     @PostMapping("/auth/resend-verify-email")
     @ApiMessage("Send email successfully")
-    public ResponseEntity<Void> resend(@Valid @RequestBody ResendVerifyEmailRequestDTO dto){
-        userService.resendEmail(dto, verifyTokenExpiration);
+    public ResponseEntity<Void> resend(
+            @Valid @RequestBody ResendVerifyEmailRequestDTO dto,
+            @RequestHeader(value = "X-Client-Type", defaultValue = "WEB") String clientType) {
+        userService.resendEmail(dto, clientType);
         return ResponseEntity.ok(null);
     }
 

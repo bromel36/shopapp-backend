@@ -29,13 +29,13 @@ public interface IUserService {
 
     User getUserLogin();
 
-    UserResponseDTO handleCustomerRegister(User userRequest, long expirationTime);
+    UserResponseDTO handleCustomerRegister(User userRequest, String clientType);
 
     void handleChangePassword(@Valid ChangePasswordDTO changePasswordDTO);
 
-    void handleForgotPassword(@Valid ForgotPasswordDTO forgotPasswordDTO);
+    void handleForgotPassword(@Valid ForgotPasswordDTO forgotPasswordDTO, String clientType);
 
-    String handleVerifyUser(String token, TokenTypeEnum type);
+    Object handleVerifyUser(String token, TokenTypeEnum type);
 
-    void resendEmail(ResendVerifyEmailRequestDTO dto, long expirationTime);
+    void resendEmail(ResendVerifyEmailRequestDTO dto, String clientType);
 }

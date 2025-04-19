@@ -60,22 +60,6 @@ public class UserController {
         return ResponseEntity.ok(userResponseDTO);
     }
 
-    @PostMapping("/users/change-password")
-    @ApiMessage("change password success")
-    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO){
-        this.userService.handleChangePassword(changePasswordDTO);
-
-        return ResponseEntity.ok(null);
-    }
-
-    @PostMapping("/user/forgot-pwd")
-    @ApiMessage("send verify email successfully")
-    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordDTO forgotPasswordDTO){
-        this.userService.handleForgotPassword(forgotPasswordDTO);
-        return ResponseEntity.ok(null);
-    }
-
-
 //    @DeleteMapping("/users/{id}")
 //    @ApiMessage("deleted a user")
 //    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) throws IdInvalidException {
