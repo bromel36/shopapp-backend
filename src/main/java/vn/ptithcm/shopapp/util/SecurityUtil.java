@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
+import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.response.LoginResponseDTO;
 
 import javax.crypto.SecretKey;
@@ -93,6 +94,10 @@ public class SecurityUtil {
                 getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
 
         return jwtDecoder.decode(token);
+    }
+
+    public static boolean isCustomer(User user){
+        return user.getRole().getCode().equalsIgnoreCase(ROLE_CUSTOMER);
     }
 
 

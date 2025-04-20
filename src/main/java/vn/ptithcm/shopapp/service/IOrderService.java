@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import vn.ptithcm.shopapp.model.entity.Order;
+import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
 import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
@@ -11,7 +12,7 @@ import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 
 public interface IOrderService {
 
-    OrderResponseDTO handleCreateOrder(OrderRequestDTO orderRequest);
+    OrderResponseDTO handleCreateOrder(OrderRequestDTO orderRequest, User userOrder);
 
     OrderResponseDTO handleUpdateOrder(UpdateOrderRequestDTO ordRequest);
 

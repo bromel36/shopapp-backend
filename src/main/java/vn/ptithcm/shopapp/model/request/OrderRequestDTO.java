@@ -48,8 +48,6 @@ public class OrderRequestDTO {
     @NotNull(message = "Order Details is required")
     private List<OrderDetails> orderDetails;
 
-    @Valid
-    @NotNull(message = "User is required")
     private OrderRequestUser user;
 
     @Getter
