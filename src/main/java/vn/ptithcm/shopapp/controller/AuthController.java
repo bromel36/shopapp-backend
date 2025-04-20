@@ -1,6 +1,8 @@
 package vn.ptithcm.shopapp.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -21,6 +23,7 @@ import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Authentication")
 public class AuthController {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -37,7 +40,10 @@ public class AuthController {
         this.securityUtil = securityUtil;
         this.userService = userService;
     }
-
+    @Operation(
+            summary = "User login",
+            description = "Authenticate user with username and password, then return access and refresh tokens along with user info."
+    )
     @PostMapping("/auth/login")
     @ApiMessage("success login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginDTO) {
@@ -55,7 +61,10 @@ public class AuthController {
         return handleLoginOrRefreshCase(authentication.getName());
     }
 
-
+    @Operation(
+            summary = "Get current user info",
+            description = "Retrieve the current authenticated user's information based on the JWT access token."
+    )
     @GetMapping("/auth/account")
     public ResponseEntity<LoginResponseDTO> getAccount() {
         String username = SecurityUtil.getCurrentUserLogin().orElse(null);
@@ -81,7 +90,10 @@ public class AuthController {
         return ResponseEntity.ok().body(result);
     }
 
-
+    @Operation(
+            summary = "Refresh JWT tokens",
+            description = "Generate a new access token using the provided refresh token from cookie. Also returns updated user info."
+    )
     @GetMapping("/auth/refresh")
     @ApiMessage("Refresh token")
     public ResponseEntity<LoginResponseDTO> handleRefreshToken(
@@ -100,7 +112,10 @@ public class AuthController {
         }
         return handleLoginOrRefreshCase(email);
     }
-
+    @Operation(
+            summary = "User logout",
+            description = "Logs out the current user by invalidating the refresh token and removing the cookie."
+    )
     @PostMapping("/auth/logout")
     @ApiMessage("Logout user")
     public ResponseEntity<Void> logout() {
@@ -115,7 +130,10 @@ public class AuthController {
         }
         throw new IdInvalidException("Logout user is invalid!!!");
     }
-
+    @Operation(
+            summary = "User registration",
+            description = "Registers a new user account with the provided information."
+    )
     @PostMapping("/auth/register")
     @ApiMessage("User register account")
     public ResponseEntity<UserResponseDTO> register(@RequestBody User userRequest){

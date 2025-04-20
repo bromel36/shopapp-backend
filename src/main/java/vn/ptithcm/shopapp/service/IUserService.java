@@ -30,4 +30,6 @@ public interface IUserService {
     void handleChangePassword(@Valid ChangePasswordDTO changePasswordDTO);
 
     void handleUserDelete(Long id);
+
+    User getUserById(Long id);
 }

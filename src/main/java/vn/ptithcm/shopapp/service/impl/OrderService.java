@@ -54,15 +54,9 @@ public class OrderService implements IOrderService {
 
     @Override
     @Transactional
-    public OrderResponseDTO handleCreateOrder(OrderRequestDTO orderRequest) {
+    public OrderResponseDTO handleCreateOrder(OrderRequestDTO orderRequest, User userOrder) {
 
         validateOrderRequest(orderRequest);
-
-        User userOrder = userService.getUserById(orderRequest.getUser().getId());
-
-        User currentUserLogin = userService.getUserLogin();
-
-        validateUserPermissions(currentUserLogin, userOrder);
 
         Order order = saveOrder(orderRequest, userOrder);
 
@@ -169,17 +163,6 @@ public class OrderService implements IOrderService {
         if (orderRequest.getOrderDetails().isEmpty()) {
             throw new IdInvalidException("Order Detail might be empty. Please add a product!!!");
         }
-    }
-
-    private void validateUserPermissions(User currentUser, User orderUser) {
-        if (currentUser.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
-                && currentUser.getId() != orderUser.getId()) {
-            throw new IdInvalidException("Customers can only order by themselves.");
-        }
-//        if (!currentUser.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
-//                && currentUser.getId().equalsIgnoreCase(orderUser.getId())) {
-//            throw new IdInvalidException("Staff are not allowed to order by themselves.");
-//        }
     }
 
     private Order saveOrder(OrderRequestDTO orderRequest, User userOrder) {
