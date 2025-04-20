@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import vn.ptithcm.shopapp.model.response.RestResponse;
 
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,8 @@ public class GlobalException {
             UsernameNotFoundException.class,
             BadCredentialsException.class,
             IdInvalidException.class,
-            StorageException.class
+            StorageException.class,
+            Exception.class
     })
     public ResponseEntity<RestResponse<Object>> handleUsernameNotFoundException(Exception ex){
         RestResponse<Object> res = new RestResponse<>();
@@ -75,6 +77,16 @@ public class GlobalException {
         res.setData(ex.getOutOfStockItems());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(res);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<RestResponse<Object>> handleIllegalArgumentException(IllegalArgumentException ex){
+        RestResponse<Object> res = new RestResponse<>();
+        res.setMessage(ex.getMessage());
+        res.setError("Exception occur ....");
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
 }

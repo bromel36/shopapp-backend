@@ -26,7 +26,7 @@ import java.util.List;
 @Service
 public class UserService implements IUserService {
 
-    @Value("${ptithcm.avatar.default}")
+    @Value("${bromel.avatar.default}")
     private String defaultAvatar;
 
     private final UserRepository userRepository;
@@ -184,6 +184,7 @@ public class UserService implements IUserService {
     public void handleUserDelete(Long id) {
         User userDB = this.getUserById(id);
         userDB.setActive(false);
+        userRepository.save(userDB);
     }
 
 

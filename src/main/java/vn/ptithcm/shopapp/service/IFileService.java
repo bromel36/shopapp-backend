@@ -19,4 +19,6 @@ public interface IFileService {
     long getFileLength(String file, String fullDirectoryPath) throws URISyntaxException;
 
     InputStreamResource getResource(String file, String fullDirectoryPath) throws URISyntaxException, FileNotFoundException;
+
+    FileResponseDTO uploadImage(MultipartFile file, String folderName);
 }

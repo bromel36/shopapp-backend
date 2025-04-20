@@ -1,7 +1,7 @@
 package vn.ptithcm.shopapp.controller;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -18,16 +18,17 @@ import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
 @Tag(name = "File")
 public class FileController {
 
-    @Value("${ptithcm.upload-file.base-uri}")
+    @Value("${bromel.upload-file.base-uri}")
     private String baseUri;
+
+    @Value("${bromel.upload-file.remote-folder}")
+    private String remoteFolder;
 
     private final IFileService fileService;
 
@@ -35,33 +36,45 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    @Operation(summary = "Upload a file", description = "Uploads a file to the specified folder.")
-    @ApiMessage("Upload a file")
-    @PostMapping("/files")
-    public ResponseEntity<FileResponseDTO> upload(
-            @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam("folder") String folder) throws URISyntaxException, IOException {
-        String fullDirectoryPath = baseUri + folder;
+        @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        @Operation(summary = "Upload a file", description = "Uploads a file to the specified folder.")
+        @ApiMessage("Upload a file")
+        public ResponseEntity<FileResponseDTO> upload(
+                @RequestParam(value = "file", required = true) MultipartFile file,
+                @RequestParam(value = "folder", required = true) String folder)  {
 
-        if (file == null || file.isEmpty()) {
-            throw new StorageException("File is empty!!!");
+                String fullDirectory = remoteFolder + folder;
+                return ResponseEntity.ok().body(fileService.uploadImage(file, fullDirectory));
+
         }
 
-        String fileName = file.getOriginalFilename();
-        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
-
-        boolean isValid = allowedExtensions.stream().anyMatch(it -> fileName.toLowerCase().endsWith("." + it));
-
-        if (!isValid) {
-            throw new StorageException("File extension is not valid!!!. Only accept " + allowedExtensions.toString());
-        }
-
-        this.fileService.createUpLoadFolder(fullDirectoryPath);
-
-        FileResponseDTO responseDTO = this.fileService.storeFile(file, fullDirectoryPath);
-
-        return ResponseEntity.ok().body(responseDTO);
-    }
+//    @Operation(summary = "Upload a file", description = "Uploads a file to the specified folder.")
+//    @ApiMessage("Upload a file")
+//    @PostMapping("/files")
+//    public ResponseEntity<FileResponseDTO> upload(
+//            @RequestParam(value = "file", required = false) MultipartFile file,
+//            @RequestParam("folder") String folder) throws URISyntaxException, IOException {
+//        String fullDirectoryPath = baseUri + folder;
+//
+//        if (file == null || file.isEmpty()) {
+//            throw new StorageException("File is empty!!!");
+//        }
+//
+//        String fileName = file.getOriginalFilename();
+//        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+//
+//        boolean isValid = allowedExtensions.stream().anyMatch(it -> fileName.toLowerCase().endsWith("." + it));
+//
+//        if (!isValid) {
+//            throw new StorageException("File extension is not valid!!!. Only accept " + allowedExtensions.toString());
+//        }
+//
+//        this.fileService.createUpLoadFolder(fullDirectoryPath);
+//
+//        FileResponseDTO responseDTO = this.fileService.storeFile(file, fullDirectoryPath);
+//
+//        return ResponseEntity.ok().body(responseDTO);
+//    }
 
     @Operation(summary = "Download a file", description = "Downloads a file from the specified folder.")
     @GetMapping("/files")
