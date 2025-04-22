@@ -30,9 +30,9 @@ public class OrderConverter {
         else{
             order.setStatus(dto.getStatus());
         }
-        order.setName(dto.getName());
-        order.setPhone(dto.getPhone());
-        order.setShippingAddress(dto.getShippingAddress());
+//        order.setName(dto.getName());
+//        order.setPhone(dto.getPhone());
+//        order.setShippingAddress(dto.getShippingAddress());
         order.setTotalMoney(dto.getTotalMoney());
         order.setPaymentMethod(dto.getPaymentMethod());
 // xài modelmapper chỗ này nó sẽ bị lỗi nên phải làm chay

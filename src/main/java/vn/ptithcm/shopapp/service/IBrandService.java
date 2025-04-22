@@ -12,7 +12,7 @@ public interface IBrandService {
 
     Brand handleCreateBrand(Brand brand);
 
-    Category handleUpdateBrand(Brand brand);
+    Brand handleUpdateBrand(Brand brand);
 
     PaginationResponseDTO handldeFetchAllBrands(Specification<Brand> spec, Pageable pageable);
 }

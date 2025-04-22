@@ -35,7 +35,7 @@ public class BrandService implements IBrandService {
     }
 
     @Override
-    public Category handleUpdateBrand(Brand brand) {
+    public Brand handleUpdateBrand(Brand brand) {
         return null;
     }
 

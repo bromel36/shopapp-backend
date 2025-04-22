@@ -24,10 +24,10 @@ public class Order extends Base {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
-    private String shippingAddress;
-
-    private String name;
-    private String phone;
+//    private String shippingAddress;
+//
+//    private String name;
+//    private String phone;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

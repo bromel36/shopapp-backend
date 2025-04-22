@@ -81,13 +81,13 @@ public class OrderService implements IOrderService {
             ordRequest.setStatus(order.getStatus());
         }
 
-        if((!order.getStatus().equals(OrderStatusEnum.PAID) && !order.getStatus().equals(OrderStatusEnum.PENDING))
-                && !order.getShippingAddress().equals(ordRequest.getShippingAddress())
-                && !order.getPhone().equals(ordRequest.getPhone())
-                && !order.getName().equals(ordRequest.getName())
-            ){
-            throw new IdInvalidException("Can not update shipping information for your status");
-        }
+//        if((!order.getStatus().equals(OrderStatusEnum.PAID) && !order.getStatus().equals(OrderStatusEnum.PENDING))
+//                && !order.getShippingAddress().equals(ordRequest.getShippingAddress())
+//                && !order.getPhone().equals(ordRequest.getPhone())
+//                && !order.getName().equals(ordRequest.getName())
+//            ){
+//            throw new IdInvalidException("Can not update shipping information for your status");
+//        }
 
         orderConverter.updateOrder(order, ordRequest);
 

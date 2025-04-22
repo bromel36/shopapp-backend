@@ -34,7 +34,7 @@ public class BrandController {
     @PutMapping("/brands")
     @ApiMessage("update a category")
     @Operation(summary = "Update a brand", description = "Update an existing brand and return the updated brand details.")
-    public ResponseEntity<Category> updateBrand(@RequestBody Brand brand) {
+    public ResponseEntity<Brand> updateBrand(@RequestBody Brand brand) {
         return ResponseEntity.ok().body(brandService.handleUpdateBrand(brand));
     }
 
