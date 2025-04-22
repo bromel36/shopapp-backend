@@ -1,6 +1,11 @@
 package vn.ptithcm.shopapp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -16,8 +21,10 @@ import vn.ptithcm.shopapp.service.IFileService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -36,17 +43,39 @@ public class FileController {
         this.fileService = fileService;
     }
 
-        @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-        @Operation(summary = "Upload a file", description = "Uploads a file to the specified folder.")
-        @ApiMessage("Upload a file")
-        public ResponseEntity<FileResponseDTO> upload(
-                @RequestParam(value = "file", required = true) MultipartFile file,
-                @RequestParam(value = "folder", required = true) String folder)  {
+    @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload a file", description = "Uploads a file to the specified folder.")
+    @ApiMessage("Upload a file")
+    public ResponseEntity<FileResponseDTO> upload(
+            @RequestParam(value = "file", required = true) MultipartFile file,
+            @RequestParam(value = "folder", required = true) String folder) {
 
-                String fullDirectory = remoteFolder + folder;
-                return ResponseEntity.ok().body(fileService.uploadImage(file, fullDirectory));
+        String fullDirectory = remoteFolder + folder;
+        return ResponseEntity.ok().body(fileService.uploadImage(file, fullDirectory));
+    }
 
-        }
+    @PostMapping(value = "/files/multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Upload multiple images",
+            description = "Uploads multiple image files to the specified folder.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Files uploaded successfully",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = FileResponseDTO.class))))
+            }
+    )
+    public ResponseEntity<List<FileResponseDTO>> uploadMultiple(
+            @RequestPart(value = "files") MultipartFile[] files,
+            @Parameter(description = "Target folder for uploads", required = true)
+            @RequestParam(value = "folder") String folder) {
+
+        String fullDirectory = remoteFolder + folder;
+        List<FileResponseDTO> responses = Arrays.stream(files)
+                .map(file -> fileService.uploadImage(file, fullDirectory))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok().body(responses);
+    }
+
 
 //    @Operation(summary = "Upload a file", description = "Uploads a file to the specified folder.")
 //    @ApiMessage("Upload a file")
