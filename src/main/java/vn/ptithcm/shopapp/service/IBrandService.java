@@ -15,4 +15,6 @@ public interface IBrandService {
     Brand handleUpdateBrand(Brand brand);
 
     PaginationResponseDTO handldeFetchAllBrands(Specification<Brand> spec, Pageable pageable);
+
+    void handleDeleteBrand(Long id);
 }

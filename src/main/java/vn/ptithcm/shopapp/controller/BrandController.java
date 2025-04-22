@@ -32,7 +32,7 @@ public class BrandController {
     }
 
     @PutMapping("/brands")
-    @ApiMessage("update a category")
+    @ApiMessage("updated a brand")
     @Operation(summary = "Update a brand", description = "Update an existing brand and return the updated brand details.")
     public ResponseEntity<Brand> updateBrand(@RequestBody Brand brand) {
         return ResponseEntity.ok().body(brandService.handleUpdateBrand(brand));
@@ -54,6 +54,14 @@ public class BrandController {
         PaginationResponseDTO paginationResponseDTO = this.brandService.handldeFetchAllBrands(spec, pageable);
 
         return ResponseEntity.ok(paginationResponseDTO);
+    }
+
+    @DeleteMapping("brands/{id}")
+    @ApiMessage("deleted a brand")
+    @Operation(summary = "Delete a brand", description = "Delete a brand by its ID.")
+    public ResponseEntity<Void> deleteBrand(@PathVariable("id") Long id) {
+        brandService.handleDeleteBrand(id);
+        return ResponseEntity.ok(null);
     }
 
 }

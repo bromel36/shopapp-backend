@@ -31,12 +31,19 @@ public class BrandService implements IBrandService {
 
     @Override
     public Brand handleCreateBrand(Brand brand) {
-        return null;
+        if(existBrandByName(brand.getName())) {
+            throw new IdInvalidException("Brand with name "+brand.getName()+" already exist");
+        }
+        return this.brandRepository.save(brand);
     }
 
     @Override
     public Brand handleUpdateBrand(Brand brand) {
-        return null;
+        Brand brandDB = handleFetchBrandById(brand.getId());
+
+        brandDB.setName(brand.getName());
+
+        return this.brandRepository.save(brandDB);
     }
 
     @Override
@@ -48,5 +55,18 @@ public class BrandService implements IBrandService {
         result.setResult(brandPage.getContent());
 
         return result;
+    }
+
+    @Override
+    public void handleDeleteBrand(Long id) {
+        Brand brand = handleFetchBrandById(id);
+        if (!brand.getProducts().isEmpty()){
+            throw new IdInvalidException("Brand cannot be deleted because there are products in the brand");
+        }
+        brandRepository.delete(brand);
+    }
+
+    boolean existBrandByName(String name){
+        return brandRepository.existsByName(name);
     }
 }
