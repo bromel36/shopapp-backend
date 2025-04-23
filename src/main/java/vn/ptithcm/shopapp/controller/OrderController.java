@@ -43,23 +43,13 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> createOrder(@Valid @RequestBody OrderRequestDTO orderRequest) {
         User currentUserLogin = userService.getUserLogin();
 
-        User userOrder = null;
-        if(orderRequest.getUser() == null){
-            userOrder = currentUserLogin;
-        }
-        else if (orderRequest.getUser().getId()!= currentUserLogin.getId()){
-            throw new IdInvalidException("Users are only place order for themselves");
-        }
-
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleCreateOrder(orderRequest, userOrder));
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleCreateOrder(orderRequest, currentUserLogin));
     }
 
     @PostMapping("/admin-orders")
     @ApiMessage("Admin created order successfully")
     @Operation(summary = "Admin create an order", description = "Create a new order and return the order details.")
     public ResponseEntity<OrderResponseDTO> createAdminOrder(@Valid @RequestBody OrderRequestDTO orderRequest) {
-        User currentUserLogin = userService.getUserLogin();
 
         if(orderRequest.getUser() == null || orderRequest.getUser().getId() == null){
             throw new IdInvalidException("User must be required");
