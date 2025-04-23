@@ -102,6 +102,7 @@ public class AddressService implements IAddressService {
     }
 
     public User validatePermission(Long userId){
+
         User userDB = userService.getUserById(userId);
 
         User currentUserLogin = userService.getUserLogin();

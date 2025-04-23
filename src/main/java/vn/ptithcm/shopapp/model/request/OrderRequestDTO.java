@@ -50,6 +50,8 @@ public class OrderRequestDTO {
 
     private OrderRequestUser user;
 
+    private OrderRequestAddress address;
+
     @Getter
     @Setter
     @NoArgsConstructor
@@ -72,6 +74,15 @@ public class OrderRequestDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OrderRequestUser{
+        @NotNull(message = "Id is required")
+        private Long id;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderRequestAddress{
         @NotNull(message = "Id is required")
         private Long id;
     }
