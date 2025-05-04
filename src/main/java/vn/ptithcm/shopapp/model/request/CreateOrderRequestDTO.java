@@ -1,7 +1,6 @@
 package vn.ptithcm.shopapp.model.request;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.Valid;
@@ -14,6 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.ptithcm.shopapp.enums.OrderStatusEnum;
 import vn.ptithcm.shopapp.enums.PaymentMethodEnum;
+import vn.ptithcm.shopapp.validation.AdminCreateOrderValidationGroup;
+import vn.ptithcm.shopapp.validation.CustomerCreateOrderValidationGroup;
 
 import java.util.List;
 
@@ -21,11 +22,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequestDTO {
-
-    @NotNull(message = "Total money is required")
-    @Min(value = 0, message = "Total money must be at least 0")
-    private Double totalMoney;
+public class CreateOrderRequestDTO {
 
     @Enumerated(EnumType.STRING)
     private OrderStatusEnum status;
@@ -33,32 +30,23 @@ public class OrderRequestDTO {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
-    private Double amountPaid;
-
-    @NotBlank(message = "Shipping Address is required")
-    private String shippingAddress;
-
-    @NotBlank(message = "Customer Name is required")
-    private String name;
-
-    @NotBlank(message = "Customer phone number is required")
-    private String phone;
-
     @Valid
-    @NotNull(message = "Order Details is required")
+    @NotNull(message = "Order Details is required", groups = {AdminCreateOrderValidationGroup.class, CustomerCreateOrderValidationGroup.class})
     private List<OrderDetails> orderDetails;
 
+    @Valid
+    @NotNull(message = "User is required", groups = AdminCreateOrderValidationGroup.class)
     private OrderRequestUser user;
+
+    @Valid
+    @NotNull(message = "Address is required", groups = CustomerCreateOrderValidationGroup.class)
+    private OrderRequestAddress address;
 
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OrderDetails {
-        @NotNull(message = "Price is required")
-        @Min(value = 0, message = "Price must be at least 0")
-        private Double price;
-
         @NotNull(message = "Quantity is required")
         @Min(value = 1, message = "Quantity must be at least 1")
         private Integer quantity;
@@ -72,8 +60,15 @@ public class OrderRequestDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OrderRequestUser{
-        @NotNull(message = "Id is required")
+        @NotNull(message = "User id is required", groups = AdminCreateOrderValidationGroup.class)
         private Long id;
     }
-
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderRequestAddress{
+        @NotNull(message = "Address id is required", groups = CustomerCreateOrderValidationGroup.class)
+        private Long id;
+    }
 }
