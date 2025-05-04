@@ -37,8 +37,8 @@ public class EmailServiceImpl implements IEmailService {
     @Value("${spring.sendgrid.verify-api}")
     private String verifyWebLink;
 
-    @Value("${spring.sendgrid.verify-deep-link}")
-    private String verifyDeepLink;
+    @Value("${spring.sendgrid.verify-redirect-link}")
+    private String redirectLink;
 
     @Value("${spring.sendgrid.template-verify.id}")
     private String templateVerifyId;
@@ -92,7 +92,7 @@ public class EmailServiceImpl implements IEmailService {
 
         templateId = token.getType() == TokenTypeEnum.RESET_PASSWORD ? templateForgotPwdId : templateVerifyId;
 
-        String verificationLink = (clientType.equalsIgnoreCase(StringUtil.WEB_HEADER)? verifyWebLink : verifyDeepLink)
+        String verificationLink = (clientType.equalsIgnoreCase(StringUtil.WEB_HEADER)? verifyWebLink : redirectLink)
                 + "?token=" + token.getToken() + "&type=" + token.getType().name();
 
         sendVerificationEmail(user.getEmail(), StringUtil.EMAIL_SUBJECT, name, verificationLink);
