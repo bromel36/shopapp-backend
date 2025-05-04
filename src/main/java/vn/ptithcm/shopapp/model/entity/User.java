@@ -61,6 +61,10 @@ public class User extends Base{
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
+    List<Address> addresses;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
     List<Order> orders;
 
     @OneToMany(mappedBy = "user")

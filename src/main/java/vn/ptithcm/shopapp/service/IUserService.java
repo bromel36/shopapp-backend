@@ -1,7 +1,6 @@
 package vn.ptithcm.shopapp.service;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import vn.ptithcm.shopapp.enums.TokenTypeEnum;
@@ -32,10 +31,13 @@ public interface IUserService {
     UserResponseDTO handleCustomerRegister(User userRequest, String clientType);
 
     void handleChangePassword(@Valid ChangePasswordDTO changePasswordDTO);
+    void handleUserDelete(Long id);
+
+    User getUserById(Long id);
 
     void handleForgotPassword(@Valid ForgotPasswordDTO forgotPasswordDTO, String clientType);
 
     Object handleVerifyUser(String token, TokenTypeEnum type);
 
-    void resendEmail(ResendVerifyEmailRequestDTO dto, String clientType);
+    void resendEmail(@Valid ResendVerifyEmailRequestDTO dto, String clientType);
 }

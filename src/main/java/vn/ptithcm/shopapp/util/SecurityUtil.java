@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
+import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.response.LoginResponseDTO;
 
 import javax.crypto.SecretKey;
@@ -114,6 +115,10 @@ public String createVerifyToken(String email, long expirationTime){
     }
 
 
+
+    public static boolean isCustomer(User user){
+        return user.getRole().getCode().equalsIgnoreCase(ROLE_CUSTOMER);
+    }
 
 
     /**

@@ -41,7 +41,6 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService implements IUserService {
 
-
     String defaultAvatar;
 
     long expirationTime;
@@ -282,7 +281,7 @@ public class UserService implements IUserService {
     public void resendEmail(ResendVerifyEmailRequestDTO dto, String clientType) {
         User userDB = userRepository.findByEmail(dto.getEmail());
 
-        if(userDB == null){
+        if (userDB == null) {
             throw new IdInvalidException("User not found");
         }
 
@@ -299,6 +298,12 @@ public class UserService implements IUserService {
 
         tokenRepository.save(token);
         log.info("Saved token");
+
+    }
+    public void handleUserDelete(Long id) {
+        User userDB = this.getUserById(id);
+        userDB.setActive(false);
+        userRepository.save(userDB);
     }
 
 

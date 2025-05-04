@@ -1,8 +1,11 @@
 package vn.ptithcm.shopapp.service.impl;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.response.FileResponseDTO;
 import vn.ptithcm.shopapp.service.IFileService;
 
@@ -16,9 +19,48 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
+import java.util.Map;
 
 @Service
 public class FileService implements IFileService {
+    private final Cloudinary cloudinary;
+
+    public FileService(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
+    }
+
+    public FileResponseDTO uploadImage(MultipartFile file, String folderName)  {
+        String originalFilename = file.getOriginalFilename(); // ví dụ: "avatar.png"
+
+        if(originalFilename == null){
+            throw new IdInvalidException("File is not contain name");
+        }
+        String contentType = file.getContentType();
+
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("File is not an image");
+        }
+
+        String fileNameWithoutExt = originalFilename.substring(0, originalFilename.lastIndexOf('.')) + "_" + System.currentTimeMillis();;
+
+        Map uploadResult = null;
+        try {
+            uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                    "folder", folderName,
+                    "public_id", fileNameWithoutExt, // 👈 giữ tên gốc (không có .png, .jpg)
+                    "overwrite", true // nếu trùng thì ghi đè
+            ));
+        } catch (IOException e) {
+            throw new IdInvalidException("Failed to upload file");
+        }
+
+        String url = (String) uploadResult.get("secure_url");
+        return FileResponseDTO.builder()
+                .fileLink(url)
+                .fileName(fileNameWithoutExt)
+                .uploadedTime(Instant.now())
+                .build();
+    }
     @Override
     public void createUpLoadFolder(String fullDirectoryPath) throws URISyntaxException {
         URI uri = new URI(fullDirectoryPath);
