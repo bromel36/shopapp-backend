@@ -12,4 +12,5 @@ import vn.ptithcm.shopapp.model.entity.Token;
 public interface TokenRepository extends JpaRepository<Token, Long>, JpaSpecificationExecutor<Token> {
 
     void deleteByUserIdAndType(long userId, TokenTypeEnum type);
+    Token findByUserIdAndType(long userId, TokenTypeEnum type);
 }

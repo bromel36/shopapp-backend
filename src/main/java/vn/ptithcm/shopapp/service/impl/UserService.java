@@ -21,6 +21,7 @@ import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
 import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
 import vn.ptithcm.shopapp.model.request.ResendVerifyEmailRequestDTO;
+import vn.ptithcm.shopapp.model.request.ResetPasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.repository.TokenRepository;
@@ -53,7 +54,7 @@ public class UserService implements IUserService {
     SecurityUtil securityUtil;
     TokenRepository tokenRepository;
 
-    public UserService(@Value("${ptithcm.avatar.default}") String defaultAvatar,@Value("${ptithcm.jwt.verify-token-validity-in-seconds}") long expirationTime, UserRepository userRepository, UserConverter userConverter, PasswordEncoder passwordEncoder, IRoleService roleService, IEmailService emailService, SecurityUtil securityUtil, TokenRepository tokenRepository) {
+    public UserService(@Value("${bromel.avatar.default}") String defaultAvatar,@Value("${ptithcm.jwt.verify-token-validity-in-seconds}") long expirationTime, UserRepository userRepository, UserConverter userConverter, PasswordEncoder passwordEncoder, IRoleService roleService, IEmailService emailService, SecurityUtil securityUtil, TokenRepository tokenRepository) {
         this.defaultAvatar = defaultAvatar;
         this.expirationTime = expirationTime;
         this.userRepository = userRepository;
@@ -250,13 +251,10 @@ public class UserService implements IUserService {
             throw new IdInvalidException("User may not exist");
         }
 
-        List<Token> tokens = userDB.getTokens();
-
-        Token contextToken = tokens.stream()
-                .filter(it -> it.getType() == type)
-                .findFirst()
-                .orElseThrow(() -> new IdInvalidException("Token of this type not found"));
-
+        Token contextToken = tokenRepository.findByUserIdAndType(userDB.getId(), type);
+        if (contextToken == null) {
+            throw new IdInvalidException("Token of this type not found");
+        }
 
         if (!Objects.equals(contextToken.getToken(), token)) {
             throw new IdInvalidException("Token invalid");
@@ -264,12 +262,12 @@ public class UserService implements IUserService {
 
         if(type == TokenTypeEnum.VERIFIED){
             userDB.setActive(true);
+            tokenRepository.delete(contextToken);
         }
         else if (type == TokenTypeEnum.RESET_PASSWORD){
-
+            log.info("Reset password token verified. Waiting for user to input new password.");
         }
 
-        tokenRepository.delete(contextToken);
         userRepository.save(userDB);
 
         log.info("User verified");
@@ -300,6 +298,29 @@ public class UserService implements IUserService {
         log.info("Saved token");
 
     }
+
+    @Override
+    public void handleResetPassword(ResetPasswordDTO dto) {
+        String token = dto.getToken();
+        if(securityUtil.isTokenExpired(token)){
+            throw new IdInvalidException("Expired token");
+        }
+        String userEmail = securityUtil.extractEmailFromToken(token);
+
+        User userDB = userRepository.findByEmail(userEmail);
+
+        if(userDB == null){
+            throw new IdInvalidException("User may not exist");
+        }
+        userDB.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(userDB);
+
+        Token contextToken = tokenRepository.findByUserIdAndType(userDB.getId(), TokenTypeEnum.RESET_PASSWORD);
+        if (contextToken != null) {
+            tokenRepository.delete(contextToken);
+        }
+    }
+
     public void handleUserDelete(Long id) {
         User userDB = this.getUserById(id);
         userDB.setActive(false);

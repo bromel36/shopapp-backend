@@ -65,14 +65,6 @@ public class UserController {
         return ResponseEntity.ok(userResponseDTO);
     }
 
-    @PostMapping("/users/change-password")
-    @ApiMessage("change password success")
-    @Operation(summary = "Change password", description = "Change the password of the currently logged-in user.")
-    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO) {
-        this.userService.handleChangePassword(changePasswordDTO);
-
-        return ResponseEntity.ok(null);
-    }
 
     @DeleteMapping("/users/{id}")
     @ApiMessage("deleted a user")

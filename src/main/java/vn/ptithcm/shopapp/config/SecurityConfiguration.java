@@ -48,7 +48,8 @@ public class SecurityConfiguration {
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/send/**",
-                "/api/v1/users/forgot-pwd/**"
+                "/api/v1/users/forgot-pwd/**",
+                "/api/v1/auth/reset-pwd/**"
         };
         String[] getWhiteList ={
                 "/api/v1/products/**",

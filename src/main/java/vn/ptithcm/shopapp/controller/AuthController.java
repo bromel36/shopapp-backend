@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.enums.TokenTypeEnum;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.User;
-import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
-import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
-import vn.ptithcm.shopapp.model.request.LoginRequestDTO;
-import vn.ptithcm.shopapp.model.request.ResendVerifyEmailRequestDTO;
+import vn.ptithcm.shopapp.model.request.*;
 import vn.ptithcm.shopapp.model.response.LoginResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.IUserService;
@@ -175,6 +172,8 @@ public class AuthController {
         return ResponseEntity.ok(userService.handleVerifyUser(token, type));
     }
 
+
+
     @PostMapping("/auth/resend-verify-email")
     @ApiMessage("Send email successfully")
     public ResponseEntity<Void> resend(
@@ -183,6 +182,16 @@ public class AuthController {
         userService.resendEmail(dto, clientType);
         return ResponseEntity.ok(null);
     }
+
+
+    @PostMapping("/auth/reset-pwd")
+    @ApiMessage("User reset password successfully")
+    public ResponseEntity<Void> resetPassword(
+            @Valid @RequestBody ResetPasswordDTO dto) {
+        userService.handleResetPassword(dto);
+        return ResponseEntity.ok(null);
+    }
+
 
 
     public ResponseCookie createCookie(String refreshToken, long maxAge) {

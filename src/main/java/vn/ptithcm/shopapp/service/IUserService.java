@@ -8,6 +8,7 @@ import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
 import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
 import vn.ptithcm.shopapp.model.request.ResendVerifyEmailRequestDTO;
+import vn.ptithcm.shopapp.model.request.ResetPasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 
@@ -40,4 +41,6 @@ public interface IUserService {
     Object handleVerifyUser(String token, TokenTypeEnum type);
 
     void resendEmail(@Valid ResendVerifyEmailRequestDTO dto, String clientType);
+
+    void handleResetPassword(@Valid ResetPasswordDTO dto);
 }
