@@ -9,12 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.Order;
 import vn.ptithcm.shopapp.model.entity.User;
-import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
+import vn.ptithcm.shopapp.model.request.CreateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
@@ -22,6 +22,8 @@ import vn.ptithcm.shopapp.service.IOrderService;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
+import vn.ptithcm.shopapp.validation.AdminCreateOrderValidationGroup;
+import vn.ptithcm.shopapp.validation.CustomerCreateOrderValidationGroup;
 
 @Slf4j
 @RestController
@@ -40,26 +42,16 @@ public class OrderController {
     @PostMapping("/orders")
     @ApiMessage("Customer place order success")
     @Operation(summary = "Customer place an order", description = "Create a new order and return the order details.")
-    public ResponseEntity<OrderResponseDTO> createOrder(@Valid @RequestBody OrderRequestDTO orderRequest) {
+    public ResponseEntity<OrderResponseDTO> createOrder(@Validated(CustomerCreateOrderValidationGroup.class) @RequestBody CreateOrderRequestDTO orderRequest) {
         User currentUserLogin = userService.getUserLogin();
 
-        User userOrder = null;
-        if(orderRequest.getUser() == null){
-            userOrder = currentUserLogin;
-        }
-        else if (orderRequest.getUser().getId()!= currentUserLogin.getId()){
-            throw new IdInvalidException("Users are only place order for themselves");
-        }
-
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleCreateOrder(orderRequest, userOrder));
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleCreateOrder(orderRequest, currentUserLogin));
     }
 
     @PostMapping("/admin-orders")
     @ApiMessage("Admin created order successfully")
     @Operation(summary = "Admin create an order", description = "Create a new order and return the order details.")
-    public ResponseEntity<OrderResponseDTO> createAdminOrder(@Valid @RequestBody OrderRequestDTO orderRequest) {
-        User currentUserLogin = userService.getUserLogin();
+    public ResponseEntity<OrderResponseDTO> createAdminOrder(@Validated(AdminCreateOrderValidationGroup.class) @RequestBody CreateOrderRequestDTO orderRequest) {
 
         if(orderRequest.getUser() == null || orderRequest.getUser().getId() == null){
             throw new IdInvalidException("User must be required");
@@ -75,10 +67,19 @@ public class OrderController {
 
 
     @PutMapping("/orders")
-    @ApiMessage("update order")
-    @Operation(summary = "Update an order", description = "Update an existing order and return the updated order details.")
+    @ApiMessage("Customer update order")
+    @Operation(summary = "Customer update an order", description = "Update an existing order and return the updated order details.")
     public ResponseEntity<OrderResponseDTO> updateOrder(@Valid @RequestBody UpdateOrderRequestDTO ordRequest) {
-        return ResponseEntity.ok().body(orderService.handleUpdateOrder(ordRequest));
+        User currentUserLogin = userService.getUserLogin();
+        return ResponseEntity.ok().body(orderService.handleCustomerUpdateOrder(ordRequest, currentUserLogin));
+    }
+
+
+    @PutMapping("/admin-orders")
+    @ApiMessage("Admin update order")
+    @Operation(summary = "Admin update an order", description = "Update an existing order and return the updated order details.")
+    public ResponseEntity<OrderResponseDTO> updateAdminOrder(@Valid @RequestBody UpdateOrderRequestDTO ordRequest) {
+        return ResponseEntity.ok().body(orderService.handleAdminUpdateOrder(ordRequest));
     }
 
     @GetMapping("/orders/{id}")

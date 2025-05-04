@@ -1,8 +1,11 @@
 package vn.ptithcm.shopapp.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name = "addresses")
@@ -34,4 +37,8 @@ public class Address extends Base{
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "address", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Order> orders;
 }

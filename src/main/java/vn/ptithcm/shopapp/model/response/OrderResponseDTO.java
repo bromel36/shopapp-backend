@@ -29,11 +29,6 @@ public class OrderResponseDTO {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
-    private String shippingAddress;
-    private String name;
-
-    private String phone;
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Instant createdAt;
 
@@ -47,6 +42,9 @@ public class OrderResponseDTO {
     private String updatedBy;
 
     private UserOrder user;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private OrderAddressResponse address;
 
     private List<OrderDetailsResponse> orderDetails;
 
@@ -70,6 +68,25 @@ public class OrderResponseDTO {
         private Integer quantity;
         private String productName;
         private String productThumbnail;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderAddressResponse{
+        private Long id;
+        private String recipientName;
+
+        private String phoneNumber;
+
+        private String street;
+
+        private String ward;
+
+        private String district;
+
+        private String city;
     }
 
 }

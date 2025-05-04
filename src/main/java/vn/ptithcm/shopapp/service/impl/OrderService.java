@@ -17,20 +17,20 @@ import vn.ptithcm.shopapp.converter.OrderConverter;
 import vn.ptithcm.shopapp.enums.OrderStatusEnum;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.*;
-import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
+import vn.ptithcm.shopapp.model.request.CreateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
-import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.repository.*;
+import vn.ptithcm.shopapp.service.IAddressService;
 import vn.ptithcm.shopapp.service.IOrderService;
+import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.PaginationUtil;
 import vn.ptithcm.shopapp.util.SecurityUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -42,10 +42,10 @@ public class OrderService implements IOrderService {
 
     OrderRepository orderRepository;
     OrderConverter orderConverter;
-    PaymentRepository paymentRepository;
     ProductService productService;
     OrderDetailRepository orderDetailRepository;
-    UserService userService;
+    IUserService userService;
+    IAddressService addressService;
     ProductRepository productRepository;
     FilterParser filterParser;
     FilterSpecificationConverter filterSpecificationConverter;
@@ -54,13 +54,11 @@ public class OrderService implements IOrderService {
 
     @Override
     @Transactional
-    public OrderResponseDTO handleCreateOrder(OrderRequestDTO orderRequest, User userOrder) {
+    public OrderResponseDTO handleCreateOrder(CreateOrderRequestDTO orderRequest, User userOrder) {
 
         validateOrderRequest(orderRequest);
 
         Order order = saveOrder(orderRequest, userOrder);
-
-        savePayment(orderRequest.getAmountPaid(),order);
 
         processOrderDetails(orderRequest, order);
 
@@ -68,35 +66,62 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public OrderResponseDTO handleUpdateOrder(UpdateOrderRequestDTO ordRequest) {
+    public OrderResponseDTO handleCustomerUpdateOrder(UpdateOrderRequestDTO ordRequest, User user) {
 
         Order order = handleFetchOrder(ordRequest.getId());
 
-
-        String currentUserRole = userService.getUserLogin().getRole().getCode();
-
-        if (currentUserRole.equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)
-                && (!ordRequest.getStatus().equals(OrderStatusEnum.UNPAID) && !ordRequest.getStatus().equals(OrderStatusEnum.PENDING))
-        ) {
-            ordRequest.setStatus(order.getStatus());
+        if (order.getUser().getId() != user.getId()){
+            throw new IdInvalidException("Customers only update their orders");
         }
 
-//        if((!order.getStatus().equals(OrderStatusEnum.PAID) && !order.getStatus().equals(OrderStatusEnum.PENDING))
-//                && !order.getShippingAddress().equals(ordRequest.getShippingAddress())
-//                && !order.getPhone().equals(ordRequest.getPhone())
-//                && !order.getName().equals(ordRequest.getName())
-//            ){
-//            throw new IdInvalidException("Can not update shipping information for your status");
+        if(!order.getStatus().equals(OrderStatusEnum.PENDING) && !order.getStatus().equals(OrderStatusEnum.UNPAID)) {
+            throw new IdInvalidException("Customers does not update this order status");
+        }
+        else if(order.getStatus().equals(OrderStatusEnum.PENDING) && !ordRequest.getStatus().equals(OrderStatusEnum.CANCELED)) {
+            throw new IdInvalidException("Customers does not update this order status");
+        }
+        else if(order.getStatus().equals(OrderStatusEnum.UNPAID) && !ordRequest.getStatus().equals(OrderStatusEnum.PAID)) {
+            throw new IdInvalidException("Customers does not update this order status");
+        }
+
+        order.setStatus(ordRequest.getStatus());
+
+//        if (ordRequest.getAddress().getId() != order.getAddress().getId()) {
+//            Address addressDB = addressService.handleFetchAddressById(ordRequest.getAddress().getId());
+//
+//            if(addressDB.getUser().getId() != user.getId()){
+//                throw new IdInvalidException("Invalid address");
+//            }
+//            order.setAddress(addressDB);
 //        }
+        validateAndUpdateOrderAddress(order, ordRequest.getAddress().getId(), user.getId());
+        orderRepository.save(order);
+        return orderConverter.convertToOrderResponseDTO(order);
+    }
 
-        orderConverter.updateOrder(order, ordRequest);
+    @Override
+    public OrderResponseDTO handleAdminUpdateOrder(UpdateOrderRequestDTO ordRequest) {
+        Order order = handleFetchOrder(ordRequest.getId());
 
-        if(ordRequest.getAmountPaid()!= null  && !currentUserRole.equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)){
-            savePayment(ordRequest.getAmountPaid(), order);
+        if(order.getStatus().equals(OrderStatusEnum.PAID)){
+            if (ordRequest.getStatus().equals(OrderStatusEnum.UNPAID) || ordRequest.getStatus().equals(OrderStatusEnum.PENDING)) {
+                throw new IdInvalidException("Users does not update this order status to previous state");
+            }
         }
+
+        order.setStatus(ordRequest.getStatus());
+
+//        if (ordRequest.getAddress().getId() != order.getAddress().getId()) {
+//            Address addressDB = addressService.handleFetchAddressById(ordRequest.getAddress().getId());
+//
+//            if(addressDB.getUser().getId() != order.getUser().getId()){
+//                throw new IdInvalidException("Invalid address");
+//            }
+//            order.setAddress(addressDB);
+//        }
+        validateAndUpdateOrderAddress(order, ordRequest.getAddress().getId(), order.getUser().getId());
 
         orderRepository.save(order);
-
         return orderConverter.convertToOrderResponseDTO(order);
     }
 
@@ -155,33 +180,34 @@ public class OrderService implements IOrderService {
         return result;
     }
 
-    private double getTotalPaid(String orderId) {
-        return paymentRepository.sumPaymentsByOrderId(orderId);
-    }
 
-    private void validateOrderRequest(OrderRequestDTO orderRequest) {
+
+    private void validateOrderRequest(CreateOrderRequestDTO orderRequest) {
         if (orderRequest.getOrderDetails().isEmpty()) {
             throw new IdInvalidException("Order Detail might be empty. Please add a product!!!");
         }
     }
 
-    private Order saveOrder(OrderRequestDTO orderRequest, User userOrder) {
+    private Order saveOrder(CreateOrderRequestDTO orderRequest, User userOrder) {
+
+        Address address = null;
+        if(orderRequest.getAddress() != null && orderRequest.getAddress().getId() != null) {
+            address = addressService.handleFetchAddressById(orderRequest.getAddress().getId());
+
+            if (address.getUser().getId() != userOrder.getId()) {
+                throw new IdInvalidException("Users don't have the same address");
+            }
+        }
 
         Order order = orderConverter.convertToOrder(orderRequest);
+        order.setAddress(address);
         order.setUser(userOrder);
         return orderRepository.save(order);
     }
 
-    private void savePayment(Double amountPaid, Order order) {
-        Payment payment = new Payment();
-        payment.setOrder(order);
-        payment.setAmountPaid(amountPaid != null ? amountPaid : 0.0);
-        paymentRepository.save(payment);
-    }
-
-    private void processOrderDetails(OrderRequestDTO orderRequest, Order order) {
+    private void processOrderDetails(CreateOrderRequestDTO orderRequest, Order order) {
         List<String> productIds = orderRequest.getOrderDetails().stream()
-                .map(OrderRequestDTO.OrderDetails::getProductId)
+                .map(CreateOrderRequestDTO.OrderDetails::getProductId)
                 .toList();
 
         List<Product> products = productService.handleFetchAllProductByIds(productIds);
@@ -192,8 +218,9 @@ public class OrderService implements IOrderService {
                 ));
 
         List<OrderDetail> orderDetails = new ArrayList<>();
+        Double totalMoney = 0.0;
 
-        for (OrderRequestDTO.OrderDetails detail : orderRequest.getOrderDetails()) {
+        for (CreateOrderRequestDTO.OrderDetails detail : orderRequest.getOrderDetails()) {
             Product product = productMap.get(detail.getProductId());
 
             if (product.getQuantity() < detail.getQuantity() || !product.getStatus()) {
@@ -206,15 +233,30 @@ public class OrderService implements IOrderService {
             OrderDetail orderDetail = new OrderDetail();
 
             orderDetail.setOrder(order);
-            orderDetail.setPrice(detail.getPrice());
+            orderDetail.setPrice(product.getPrice());
             orderDetail.setQuantity(detail.getQuantity());
+
+            totalMoney = totalMoney + product.getPrice()*detail.getQuantity();
+
             orderDetail.setProduct(product);
 
             orderDetails.add(orderDetail);
         }
         order.setOrderDetails(orderDetails);
-
-        productRepository.saveAll(products);
+        order.setTotalMoney(totalMoney);
+//        productRepository.saveAll(products);
         orderDetailRepository.saveAll(orderDetails);
     }
+    private void validateAndUpdateOrderAddress(Order order, Long newAddressId, Long userId) {
+        if (!order.getAddress().getId().equals(newAddressId)) {
+            Address addressDB = addressService.handleFetchAddressById(newAddressId);
+
+            if (!addressDB.getUser().getId().equals(userId)) {
+                throw new IdInvalidException("Invalid address");
+            }
+            order.setAddress(addressDB);
+        }
+    }
+
+
 }

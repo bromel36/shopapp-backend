@@ -7,7 +7,6 @@ import lombok.Setter;
 import vn.ptithcm.shopapp.enums.OrderStatusEnum;
 import vn.ptithcm.shopapp.enums.PaymentMethodEnum;
 
-import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -24,11 +23,6 @@ public class Order extends Base {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
-//    private String shippingAddress;
-//
-//    private String name;
-//    private String phone;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -44,11 +38,12 @@ public class Order extends Base {
     @JsonIgnore
     private List<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Payment> payments;
 
     @OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
     @JsonIgnore
     private List<InventoryLog> inventoryLogs;
+
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 }

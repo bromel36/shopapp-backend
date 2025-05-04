@@ -5,16 +5,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import vn.ptithcm.shopapp.model.entity.Order;
 import vn.ptithcm.shopapp.model.entity.User;
-import vn.ptithcm.shopapp.model.request.OrderRequestDTO;
+import vn.ptithcm.shopapp.model.request.CreateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.request.UpdateOrderRequestDTO;
 import vn.ptithcm.shopapp.model.response.OrderResponseDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 
 public interface IOrderService {
 
-    OrderResponseDTO handleCreateOrder(OrderRequestDTO orderRequest, User userOrder);
+    OrderResponseDTO handleCreateOrder(CreateOrderRequestDTO orderRequest, User userOrder);
 
-    OrderResponseDTO handleUpdateOrder(UpdateOrderRequestDTO ordRequest);
+    OrderResponseDTO handleCustomerUpdateOrder(UpdateOrderRequestDTO ordRequest, User user);
 
     Order handleFetchOrder(Long id);
 
@@ -23,4 +23,6 @@ public interface IOrderService {
     PaginationResponseDTO handleFetchOrderByUserId(Long id, Pageable pageable);
 
     PaginationResponseDTO handlFetchAllOrders(Specification<Order> spec, Pageable pageable);
+
+    OrderResponseDTO handleAdminUpdateOrder(@Valid UpdateOrderRequestDTO ordRequest);
 }
