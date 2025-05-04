@@ -64,8 +64,6 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.handleCreateOrder(orderRequest, userOrder));
     }
 
-
-
     @PutMapping("/orders")
     @ApiMessage("Customer update order")
     @Operation(summary = "Customer update an order", description = "Update an existing order and return the updated order details.")
