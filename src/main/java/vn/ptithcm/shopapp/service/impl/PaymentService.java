@@ -1,24 +1,32 @@
 package vn.ptithcm.shopapp.service.impl;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import vn.ptithcm.shopapp.enums.OrderStatusEnum;
+import vn.ptithcm.shopapp.error.IdInvalidException;
+import vn.ptithcm.shopapp.model.entity.Order;
 import vn.ptithcm.shopapp.model.request.PaymentRequestDTO;
 import vn.ptithcm.shopapp.model.response.PaymentResponseDTO;
+import vn.ptithcm.shopapp.service.IOrderService;
 import vn.ptithcm.shopapp.service.IPaymentService;
+import vn.ptithcm.shopapp.util.VNPayUtil;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import static vn.ptithcm.shopapp.util.VNPayUtil.hmacSHA512;
 
+@Slf4j
 @Service
 public class PaymentService implements IPaymentService {
+
+    private final IOrderService orderService;
 
     @Value("${bromel.vnpay.vnp-tmn-code}")
     private String vnp_TmnCode;
@@ -33,13 +41,18 @@ public class PaymentService implements IPaymentService {
     @Value("${bromel.vnpay.return-url}")
     private String vnp_ReturnUrl;
 
+    public PaymentService(IOrderService orderService) {
+        this.orderService = orderService;
+    }
+
     @Override
-    public PaymentResponseDTO handlecreatePaymentUrl(PaymentRequestDTO dto, HttpServletRequest request) throws UnsupportedEncodingException {
+    public PaymentResponseDTO handlecreatePaymentUrl(PaymentRequestDTO dto, HttpServletRequest request){
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
         String vnp_TxnRef = dto.getOrderId().toString();
-        String vnp_IpAddr = request.getRemoteAddr();
+
+        String ipAddr = VNPayUtil.getIpAddress(request);
 
         String orderInfo = "Paid for the order with id " + dto.getOrderId() + " . Total :" + dto.getAmount() + " VND";
 
@@ -47,14 +60,16 @@ public class PaymentService implements IPaymentService {
         vnp_Params.put("vnp_Version", vnp_Version);
         vnp_Params.put("vnp_Command", vnp_Command);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-        vnp_Params.put("vnp_Amount", String.valueOf(dto.getAmount() * 100));
+
+        long vnpAmount = (long) (dto.getAmount() * 100);
+        vnp_Params.put("vnp_Amount", String.valueOf(vnpAmount));
         vnp_Params.put("vnp_CurrCode", "VND");
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
         vnp_Params.put("vnp_OrderInfo", orderInfo);
         vnp_Params.put("vnp_OrderType", orderType);
         vnp_Params.put("vnp_Locale", "vn");
         vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
-        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+        vnp_Params.put("vnp_IpAddr", ipAddr);
 
         Instant now = Instant.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
@@ -64,31 +79,72 @@ public class PaymentService implements IPaymentService {
 
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
 
+        Instant expireTime = now.plus(15, ChronoUnit.MINUTES);
+        String vnp_ExpireDate = formatter.format(expireTime);
+        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
+
+        List<String> validFields = fieldNames.stream()
+                .filter(k -> vnp_Params.get(k) != null && !vnp_Params.get(k).isEmpty())
+                .toList();
+
         StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
-        for (String fieldName : fieldNames) {
+
+        for (int i = 0; i < validFields.size(); i++) {
+            String fieldName = validFields.get(i);
             String fieldValue = vnp_Params.get(fieldName);
-            if ((fieldValue != null) && (!fieldValue.isEmpty())) {
-                hashData.append(fieldName).append('=').append(fieldValue);
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII))
-                        .append('=')
-                        .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
-                if (!fieldName.equals(fieldNames.get(fieldNames.size() - 1))) {
-                    hashData.append('&');
-                    query.append('&');
-                }
+
+            hashData.append(fieldName)
+                    .append('=')
+                    .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+            query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII))
+                    .append('=')
+                    .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+
+            if (i < validFields.size() - 1) {
+                hashData.append('&');
+                query.append('&');
             }
         }
         String queryUrl = query.toString();
-        String vnp_SecureHash = hmacSHA512(vnp_HashSecret, hashData.toString());
+        log.info("query url: {}", queryUrl);
+
+        log.info("hash data: {}", hashData);
+        String vnp_SecureHash = VNPayUtil.hmacSHA512(vnp_HashSecret, hashData.toString());
+
+        log.info("secure hash: {} ", vnp_SecureHash);
+
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
 
         PaymentResponseDTO result = new PaymentResponseDTO();
-        result.setPaymentUrl(queryUrl);
+        result.setPaymentUrl(vnp_PayUrl + "?"+ queryUrl);
 
 
         return result;
+    }
+
+    @Override
+    public Void handlePaymentResult(Map<String, String> params) {
+
+        String vnp_SecureHash = params.get("vnp_SecureHash");
+        params.remove("vnp_SecureHashType");
+        params.remove("vnp_SecureHash");
+
+        String signValue = VNPayUtil.hashAllFields(params, vnp_HashSecret);
+        if (signValue.equals(vnp_SecureHash)) {
+            String orderId = params.get("vnp_TxnRef");
+            if (params.get("vnp_ResponseCode").equals("00")){
+
+                orderService.updateOrderStatusById(Long.parseLong(orderId), OrderStatusEnum.PAID);
+
+            }
+            else{
+                throw new IdInvalidException("Paid Failed!!!");
+            }
+        }
+        return null;
     }
 }

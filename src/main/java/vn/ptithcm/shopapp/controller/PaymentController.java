@@ -11,6 +11,10 @@ import vn.ptithcm.shopapp.model.request.PaymentRequestDTO;
 import vn.ptithcm.shopapp.model.response.PaymentResponseDTO;
 import vn.ptithcm.shopapp.service.IPaymentService;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1")
@@ -30,6 +34,9 @@ public class PaymentController {
         return ResponseEntity.ok(this.paymentService.handlecreatePaymentUrl(dto, request));
     }
 
-
+    @GetMapping("/payments/vnpay-payment-return")
+    public ResponseEntity<Void> getPaymentResult(@RequestParam Map<String,String> params){
+        return ResponseEntity.ok(this.paymentService.handlePaymentResult(params));
+    }
 
 }
