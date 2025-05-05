@@ -38,7 +38,13 @@ public class AddressService implements IAddressService {
     public AddressResponseDTO handleCreateAddress(AddressRequestDTO address) {
         User userDB = validatePermission(address.getUser().getId());
 
+        if(address.getIsDefault()){
+            List<Address> addresses = userDB.getAddresses();
+            addresses.forEach(it-> it.setIsDefault(false));
+        }
+
         Address addressEntity = addressConverter.convertToAddress(address);
+
 
         addressEntity.setUser(userDB);
 
