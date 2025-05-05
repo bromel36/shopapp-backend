@@ -174,8 +174,9 @@ public class OrderService implements IOrderService {
 
         PaginationResponseDTO result = PaginationUtil.handlePaginate(pageable, orders);
 
+        List<OrderResponseDTO> orderResponseDTOS = orders.getContent().stream().map(orderConverter::convertToOrderResponseDTO).toList();
 
-        result.setResult(orders.getContent());
+        result.setResult(orderResponseDTOS);
 
         return result;
     }
