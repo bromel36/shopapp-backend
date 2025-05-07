@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.Permission;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
+import vn.ptithcm.shopapp.service.IPermissionService;
 import vn.ptithcm.shopapp.service.impl.PermissionService;
 import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 
@@ -17,7 +18,7 @@ import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 @RequestMapping("/api/v1")
 public class PermissionController {
 
-    private final PermissionService permissionService;
+    private final IPermissionService permissionService;
 
     public PermissionController(PermissionService permissionService) {
         this.permissionService = permissionService;
@@ -27,19 +28,19 @@ public class PermissionController {
     @ApiMessage("create a permission")
     @PostMapping("/permissions")
     public ResponseEntity<Permission> createPermission(@Valid @RequestBody Permission permission) {
-//        return ResponseEntity.status(HttpStatus.CREATED).body(this.permissionService.handldeCreatePermission(permission));
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.permissionService.handldeCreatePermission(permission));
     }
 
     @ApiMessage("update a permission")
     @PutMapping("/permissions")
     public ResponseEntity<Permission> updatePermission(@Valid @RequestBody Permission permission) {
-//        return ResponseEntity.ok().body(this.permissionService.handldeUpdatePermission(permission));
+        return ResponseEntity.ok().body(this.permissionService.handldeUpdatePermission(permission));
     }
 
     @ApiMessage("delete a permission")
     @DeleteMapping("/permissions/{id}")
     public ResponseEntity<Void> deletePermission(@PathVariable("id") Long id) {
-//        this.permissionService.handleDeletePermission(id);
+        this.permissionService.handleDeletePermission(id);
         return ResponseEntity.ok().body(null);
     }
 
@@ -50,7 +51,7 @@ public class PermissionController {
             @Filter Specification<Permission> spec,
             Pageable pageable
     ){
-//        PaginationResponseDTO paginationResponseDTO = this.permissionService.handleGetAllPermission(spec, pageable);
+        PaginationResponseDTO paginationResponseDTO = this.permissionService.handleGetAllPermission(spec, pageable);
 
         return ResponseEntity.ok(paginationResponseDTO);
     }
