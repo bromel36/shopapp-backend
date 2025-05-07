@@ -43,8 +43,6 @@ public class User extends Base{
 
     private Instant birthday;
 
-    private String shoppingAddress; // shipping
-
     private String avatar;
 
     @ManyToOne

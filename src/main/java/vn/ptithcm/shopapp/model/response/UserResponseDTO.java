@@ -28,8 +28,6 @@ public class UserResponseDTO {
 
     private Instant birthday;
 
-    private String shoppingAddress; // phai sua lai la shippingAddress, nào sửa nói Khìn
-
     private String avatar;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
