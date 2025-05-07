@@ -3,6 +3,7 @@ package vn.ptithcm.shopapp.service;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import vn.ptithcm.shopapp.enums.OrderStatusEnum;
 import vn.ptithcm.shopapp.model.entity.Order;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.CreateOrderRequestDTO;
@@ -25,4 +26,6 @@ public interface IOrderService {
     PaginationResponseDTO handlFetchAllOrders(Specification<Order> spec, Pageable pageable);
 
     OrderResponseDTO handleAdminUpdateOrder(@Valid UpdateOrderRequestDTO ordRequest);
+
+    void updateOrderStatusById(Long id, OrderStatusEnum status);
 }

@@ -126,6 +126,14 @@ public class OrderService implements IOrderService {
     }
 
     @Override
+    public void updateOrderStatusById(Long id, OrderStatusEnum status) {
+        Order orderDB = handleFetchOrder(id);
+        orderDB.setStatus(status);
+
+        orderRepository.save(orderDB);
+    }
+
+    @Override
     public Order handleFetchOrder(Long id) {
         Order orderDB = orderRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Order with id " + id + " not found"));

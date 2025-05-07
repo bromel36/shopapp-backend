@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import vn.ptithcm.shopapp.model.response.RestResponse;
 
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,5 +89,16 @@ public class GlobalException {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
+
+    @ExceptionHandler(UnsupportedEncodingException.class)
+    public ResponseEntity<RestResponse<Object>> handleUnsupportedEncodingException(UnsupportedEncodingException ex){
+        RestResponse<Object> res = new RestResponse<>();
+        res.setMessage(ex.getMessage());
+        res.setError("Exception occur ....");
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
 
 }

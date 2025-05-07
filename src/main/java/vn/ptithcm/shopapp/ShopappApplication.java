@@ -35,6 +35,10 @@ public class 	ShopappApplication {
 		System.setProperty("SENDGRID_TEMPLATE_VERIFY", dotenv.get("SENDGRID_TEMPLATE_VERIFY"));
 		System.setProperty("SENDGRID_TEMPLATE_FORGOT", dotenv.get("SENDGRID_TEMPLATE_FORGOT"));
 
+		//VNPay
+		System.setProperty("VNP_TMP_CODE", dotenv.get("VNP_TMP_CODE"));
+		System.setProperty("VNP_HASH_SECRET", dotenv.get("VNP_HASH_SECRET"));
+
 		SpringApplication.run(ShopappApplication.class, args);
 	}
 
