@@ -43,9 +43,13 @@ public class User extends Base{
 
     private Instant birthday;
 
-    private String shoppingAddress; // shipping
+    private String shoppingAddress;
 
     private String avatar;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Token> tokens;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

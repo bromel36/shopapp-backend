@@ -17,6 +17,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -34,16 +35,10 @@ public class SecurityUtil {
     @Value("${ptithcm.jwt.base64-secret}")
     private String jwtKey;
 
-    @Value("${ptithcm.jwt.access-token-validity-in-seconds}")
-    private long accessTokenExpiration;
 
-    @Value("${ptithcm.jwt.refresh-token-validity-in-seconds}")
-    private long refreshTokenExpiration;
-
-
-    public String createAccessToken(String email, LoginResponseDTO loginResponseDTO){
+    public String createToken(String email, LoginResponseDTO loginResponseDTO, long expirationTime){
         Instant now = Instant.now();
-        Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
+        Instant validity = now.plus(expirationTime, ChronoUnit.SECONDS);
         // @formatter:off
         LoginResponseDTO.UserInsideToken userInsideToken = new LoginResponseDTO.UserInsideToken();
         userInsideToken.setId(loginResponseDTO.getUser().getId());
@@ -60,28 +55,41 @@ public class SecurityUtil {
 
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
-    public String createRefreshToken(String email, LoginResponseDTO loginResponseDTO){
-        Instant now = Instant.now();
-        Instant validity = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
-        // @formatter:off
+//    public String createRefreshToken(String email, LoginResponseDTO loginResponseDTO){
+//        Instant now = Instant.now();
+//        Instant validity = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
+//        // @formatter:off
+//
+//        LoginResponseDTO.UserInsideToken userInsideToken = new LoginResponseDTO.UserInsideToken();
+//        userInsideToken.setId(loginResponseDTO.getUser().getId());
+//        userInsideToken.setEmail(loginResponseDTO.getUser().getEmail());
+//        userInsideToken.setFullName(loginResponseDTO.getUser().getFullName());
+//
+//
+//
+//        JwtClaimsSet claims = JwtClaimsSet.builder()
+//                .issuedAt(now)
+//                .expiresAt(validity)
+//                .subject(email)
+//                .claim("user", userInsideToken)
+//                .build();
+//        JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
+//
+//        return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+//    }
+public String createVerifyToken(String email, long expirationTime){
+    Instant now = Instant.now();
+    Instant validity = now.plus(expirationTime, ChronoUnit.SECONDS);
 
-        LoginResponseDTO.UserInsideToken userInsideToken = new LoginResponseDTO.UserInsideToken();
-        userInsideToken.setId(loginResponseDTO.getUser().getId());
-        userInsideToken.setEmail(loginResponseDTO.getUser().getEmail());
-        userInsideToken.setFullName(loginResponseDTO.getUser().getFullName());
+    JwtClaimsSet claims = JwtClaimsSet.builder()
+            .issuedAt(now)
+            .expiresAt(validity)
+            .subject(email)
+            .build();
+    JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
 
-
-
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuedAt(now)
-                .expiresAt(validity)
-                .subject(email)
-                .claim("user", userInsideToken)
-                .build();
-        JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
-
-        return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
-    }
+    return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+}
 
 
     private SecretKey getSecretKey() {
@@ -89,12 +97,24 @@ public class SecurityUtil {
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, JWT_ALGORITHM.getName());
     }
 
-    public Jwt checkValidRefreshToken(String token) {
+    public Jwt checkValidToken(String token) {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
                 getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
 
         return jwtDecoder.decode(token);
     }
+    public String extractEmailFromToken(String token) {
+        Jwt decodedJwt = checkValidToken(token);
+        return decodedJwt.getSubject();
+    }
+
+    public boolean isTokenExpired(String token) {
+        Jwt decodedJwt = checkValidToken(token);
+        Instant now = Instant.now();
+        return Objects.requireNonNull(decodedJwt.getExpiresAt()).isBefore(now);
+    }
+
+
 
     public static boolean isCustomer(User user){
         return user.getRole().getCode().equalsIgnoreCase(ROLE_CUSTOMER);

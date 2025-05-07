@@ -1,5 +1,11 @@
 package vn.ptithcm.shopapp.service.impl;
 
+import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,13 +13,20 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.ptithcm.shopapp.converter.UserConverter;
+import vn.ptithcm.shopapp.enums.TokenTypeEnum;
 import vn.ptithcm.shopapp.error.IdInvalidException;
 import vn.ptithcm.shopapp.model.entity.Role;
+import vn.ptithcm.shopapp.model.entity.Token;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
+import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
+import vn.ptithcm.shopapp.model.request.ResendVerifyEmailRequestDTO;
+import vn.ptithcm.shopapp.model.request.ResetPasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
+import vn.ptithcm.shopapp.repository.TokenRepository;
 import vn.ptithcm.shopapp.repository.UserRepository;
+import vn.ptithcm.shopapp.service.IEmailService;
 import vn.ptithcm.shopapp.service.IRoleService;
 import vn.ptithcm.shopapp.service.IUserService;
 import vn.ptithcm.shopapp.util.PaginationUtil;
@@ -21,24 +34,36 @@ import vn.ptithcm.shopapp.util.SecurityUtil;
 import vn.ptithcm.shopapp.util.StringUtil;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
+@Slf4j(topic = "USER-SERVICE")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService implements IUserService {
 
-    @Value("${bromel.avatar.default}")
-    private String defaultAvatar;
+    String defaultAvatar;
 
-    private final UserRepository userRepository;
-    private final UserConverter userConverter;
-    private final PasswordEncoder passwordEncoder;
-    private final IRoleService roleService;
+    long expirationTime;
 
-    public UserService(UserRepository userRepository, UserConverter userConverter, PasswordEncoder passwordEncoder, RoleService roleService) {
+    UserRepository userRepository;
+    UserConverter userConverter;
+    PasswordEncoder passwordEncoder;
+    IRoleService roleService;
+    IEmailService emailService;
+    SecurityUtil securityUtil;
+    TokenRepository tokenRepository;
+
+    public UserService(@Value("${bromel.avatar.default}") String defaultAvatar,@Value("${ptithcm.jwt.verify-token-validity-in-seconds}") long expirationTime, UserRepository userRepository, UserConverter userConverter, PasswordEncoder passwordEncoder, IRoleService roleService, IEmailService emailService, SecurityUtil securityUtil, TokenRepository tokenRepository) {
+        this.defaultAvatar = defaultAvatar;
+        this.expirationTime = expirationTime;
         this.userRepository = userRepository;
         this.userConverter = userConverter;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
+        this.emailService = emailService;
+        this.securityUtil = securityUtil;
+        this.tokenRepository = tokenRepository;
     }
 
     @Override
@@ -137,8 +162,9 @@ public class UserService implements IUserService {
         return user;
     }
 
+    @Transactional
     @Override
-    public UserResponseDTO handleCustomerRegister(User userRequest) {
+    public UserResponseDTO handleCustomerRegister(User userRequest, String clientType) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new IdInvalidException("Username " + userRequest.getEmail() + " is exist, please try difference username");
         }
@@ -149,16 +175,26 @@ public class UserService implements IUserService {
         }
 
         userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        userRequest.setActive(true);
+        userRequest.setActive(false);
 
         if (!StringUtil.isValid(userRequest.getAvatar())) {
             userRequest.setAvatar(defaultAvatar);
         }
+        String verifyToken = securityUtil.createVerifyToken(userRequest.getEmail(), expirationTime);
+
+        Token token = new Token();
+        token.setToken(verifyToken);
+        token.setType(TokenTypeEnum.VERIFIED);
+        token.setUser(userRequest);
+
+        tokenRepository.save(token);
 
         userRepository.save(userRequest);
 
+        emailService.sendVerifyMail(userRequest,token,clientType);
         return userConverter.convertToUserResponseDTO(userRequest);
     }
+
 
     @Override
     public void handleChangePassword(ChangePasswordDTO changePasswordDTO) {
@@ -181,6 +217,110 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public void handleForgotPassword(ForgotPasswordDTO forgotPasswordDTO, String clientType) {
+        String email = forgotPasswordDTO.getEmail();
+        User userDB = userRepository.findByEmail(email);
+
+        if(userDB == null){
+            throw new IdInvalidException("User not found");
+        }
+
+        String tokenStr = securityUtil.createVerifyToken(email, expirationTime);
+
+        Token token = new Token();
+        token.setType(TokenTypeEnum.RESET_PASSWORD);
+        token.setToken(tokenStr);
+        token.setUser(userDB);
+
+        emailService.sendVerifyMail(userDB, token, clientType);
+
+        tokenRepository.save(token);
+    }
+
+    @Transactional
+    @Override
+    public Object handleVerifyUser(String token, TokenTypeEnum type) {
+        if(securityUtil.isTokenExpired(token)){
+            throw new IdInvalidException("Expired token");
+        }
+        String userEmail = securityUtil.extractEmailFromToken(token);
+
+        User userDB = userRepository.findByEmail(userEmail);
+
+        if(userDB == null){
+            throw new IdInvalidException("User may not exist");
+        }
+
+        Token contextToken = tokenRepository.findByUserIdAndType(userDB.getId(), type);
+        if (contextToken == null) {
+            throw new IdInvalidException("Token of this type not found");
+        }
+
+        if (!Objects.equals(contextToken.getToken(), token)) {
+            throw new IdInvalidException("Token invalid");
+        }
+
+        if(type == TokenTypeEnum.VERIFIED){
+            userDB.setActive(true);
+            tokenRepository.delete(contextToken);
+        }
+        else if (type == TokenTypeEnum.RESET_PASSWORD){
+            log.info("Reset password token verified. Waiting for user to input new password.");
+        }
+
+        userRepository.save(userDB);
+
+        log.info("User verified");
+        return "User verified successfully";
+    }
+
+    @Transactional
+    @Override
+    public void resendEmail(ResendVerifyEmailRequestDTO dto, String clientType) {
+        User userDB = userRepository.findByEmail(dto.getEmail());
+
+        if (userDB == null) {
+            throw new IdInvalidException("User not found");
+        }
+
+        tokenRepository.deleteByUserIdAndType(userDB.getId(), dto.getType());
+
+        String resendToken = securityUtil.createVerifyToken(userDB.getEmail(), expirationTime);
+
+        Token token = new Token();
+        token.setToken(resendToken);
+        token.setType(dto.getType());
+        token.setUser(userDB);
+
+        emailService.sendVerifyMail(userDB, token, clientType);
+
+        tokenRepository.save(token);
+        log.info("Saved token");
+
+    }
+
+    @Override
+    public void handleResetPassword(ResetPasswordDTO dto) {
+        String token = dto.getToken();
+        if(securityUtil.isTokenExpired(token)){
+            throw new IdInvalidException("Expired token");
+        }
+        String userEmail = securityUtil.extractEmailFromToken(token);
+
+        User userDB = userRepository.findByEmail(userEmail);
+
+        if(userDB == null){
+            throw new IdInvalidException("User may not exist");
+        }
+        userDB.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(userDB);
+
+        Token contextToken = tokenRepository.findByUserIdAndType(userDB.getId(), TokenTypeEnum.RESET_PASSWORD);
+        if (contextToken != null) {
+            tokenRepository.delete(contextToken);
+        }
+    }
+
     public void handleUserDelete(Long id) {
         User userDB = this.getUserById(id);
         userDB.setActive(false);
