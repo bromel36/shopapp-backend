@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
+import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.UserResponseDTO;
 import vn.ptithcm.shopapp.service.IUserService;
@@ -65,13 +66,22 @@ public class UserController {
         return ResponseEntity.ok(userResponseDTO);
     }
 
-
     @DeleteMapping("/users/{id}")
     @ApiMessage("deleted a user")
     @Operation(summary = "Delete a user", description = "Delete a user by their ID.")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
 
         this.userService.handleUserDelete(id);
+        return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("/users/forgot-pwd")
+    @ApiMessage("send verify email successfully")
+    @Operation(summary = "User forgot password", description = "For user forgot password and reset their password")
+    public ResponseEntity<Void> forgotPassword(
+            @Valid @RequestBody ForgotPasswordDTO forgotPasswordDTO,
+            @RequestHeader(value = "X-Client-Type", defaultValue = "WEB") String clientType) {
+        this.userService.handleForgotPassword(forgotPasswordDTO, clientType);
         return ResponseEntity.ok(null);
     }
 }

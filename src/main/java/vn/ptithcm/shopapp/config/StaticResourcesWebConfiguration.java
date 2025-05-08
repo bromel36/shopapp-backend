@@ -3,6 +3,7 @@ package vn.ptithcm.shopapp.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -16,4 +17,5 @@ public class StaticResourcesWebConfiguration implements WebMvcConfigurer {
                 .addResourceLocations(baseUri);
 //        config basePath + ten file de doc
     }
+
 }

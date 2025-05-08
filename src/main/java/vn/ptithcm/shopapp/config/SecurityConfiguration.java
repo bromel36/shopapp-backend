@@ -41,31 +41,14 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
 
-        String[] whiteList ={
-                "/","/api/v1/auth/refresh","/api/v1/auth/register","/api/v1/auth/login", "/api/v1/auth/verify-email","/api/v1/auth/resend-verify-email",
-                "/storage/**",
-                "/default-avatar.jpg",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html",
-                "/send/**",
-                "/api/v1/users/forgot-pwd/**",
-                "/api/v1/auth/reset-pwd/**",
-                "/api/v1/payments/**"
-        };
-        String[] getWhiteList ={
-                "/api/v1/products/**",
-                "api/v1/brands/**",
-                "api/v1/categories/**"
-        };
 
         http
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(
                         authz -> authz
-                                .requestMatchers(whiteList).permitAll()
-                                .requestMatchers(HttpMethod.GET,getWhiteList).permitAll()
+                                .requestMatchers(SecurityUtil.whiteList).permitAll()
+                                .requestMatchers(HttpMethod.GET,SecurityUtil.getWhiteList).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())

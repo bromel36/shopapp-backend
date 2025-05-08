@@ -49,6 +49,7 @@ public class OrderService implements IOrderService {
     ProductRepository productRepository;
     FilterParser filterParser;
     FilterSpecificationConverter filterSpecificationConverter;
+    SecurityUtil securityUtil;
 
 
 
@@ -144,7 +145,12 @@ public class OrderService implements IOrderService {
     @Override
     public OrderResponseDTO handleFetchOrderResponse(Long id) {
 
-        var order = orderRepository.findById(id).orElseThrow(() -> new IdInvalidException(id+" not already"));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new IdInvalidException(id+" not already"));
+
+        User currentUserLogin = userService.getUserLogin();
+
+        securityUtil.checkCustomerIdAccess(order.getUser().getId(), currentUserLogin);
+
         OrderResponseDTO responseDTO = orderConverter.convertToOrderResponseDTO(order);
 
         return responseDTO;
@@ -159,9 +165,8 @@ public class OrderService implements IOrderService {
 
         User currentUserLogin = userService.getUserLogin();
 
-        if(currentUserLogin.getId() != userDB.getId() && currentUserLogin.getRole().getCode().equalsIgnoreCase(SecurityUtil.ROLE_CUSTOMER)){
-            throw new IdInvalidException("Access denied");
-        }
+        securityUtil.checkCustomerIdAccess(userDB.getId(), currentUserLogin);
+
         String filter = "user = '" + id + "' ";
         FilterNode node = filterParser.parse(filter);
         FilterSpecification<Order>  spec = filterSpecificationConverter.convert(filter);

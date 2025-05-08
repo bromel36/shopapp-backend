@@ -116,6 +116,10 @@ public class UserService implements IUserService {
         User user = userRepository.findById(userRequest.getId())
                 .orElseThrow(() -> new IdInvalidException("User with id= " + userRequest.getId() + " does not exists "));
 
+        User currentUserLogin = getUserLogin();
+
+        securityUtil.checkCustomerIdAccess(user.getId(), currentUserLogin);
+
         user.setActive(userRequest.getActive());
         user.setFullName(userRequest.getFullName());
         user.setAddress(userRequest.getAddress());

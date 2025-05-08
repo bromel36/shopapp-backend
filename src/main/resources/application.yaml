@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: shopapp
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY:}
+    mail-from: ${SENDGRID_MAIL_FROM:no-reply@localhost}
+    template-verify:
+      id: ${SENDGRID_TEMPLATE_VERIFY:}
+    template-forgot-pwd:
+      id: ${SENDGRID_TEMPLATE_FORGOT:}
+    verify-api: http://localhost:8080/api/v1/auth/verify-email
+    verify-redirect-link: http://localhost:3000/redirect
+    verify:
+      logo: https://res.cloudinary.com/dtfe2e0ey/image/upload/v1744883424/logo_u538kh.png
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  cloudinary:
+    name: ${CLOUDINARY_NAME:}
+    api:
+      key: ${CLOUDINARY_API_KEY:}
+      secret: ${CLOUDINARY_API_SECRET:}
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
+
+ptithcm:
+  jwt:
+    base64-secret: ${JWT_BASE64_SECRET:}
+    access-token-validity-in-seconds: 8640000
+    refresh-token-validity-in-seconds: 8640000
+    verify-token-validity-in-seconds: 3600
+
+bromel:
+  upload-file:
+    base-uri: file:///D:/upload/
+    remote-folder: upload/
+  avatar:
+    default: default-avatar.jpg
+  vnpay:
+    vnp-tmn-code: ${VNP_TMP_CODE:}
+    vnp-hash-secret: ${VNP_HASH_SECRET:}
+    url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+    return-url: http://localhost:8080/api/v1/payments/vnpay-payment-return
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /api-document.html
+    operationsSorter: method
+    tryItOutEnabled: true
+    filter: false
+  packagesToScan: vn.ptithcm.shopapp.controller

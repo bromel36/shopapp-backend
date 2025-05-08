@@ -1,6 +1,5 @@
 package vn.ptithcm.shopapp.controller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -39,23 +38,21 @@ public class AuthController {
     @Value("${ptithcm.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, IUserService userService) {
+    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil,
+            IUserService userService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
     }
-    @Operation(
-            summary = "User login",
-            description = "Authenticate user with username and password, then return access and refresh tokens along with user info."
-    )
+
+    @Operation(summary = "User login", description = "Authenticate user with username and password, then return access and refresh tokens along with user info.")
     @PostMapping("/auth/login")
     @ApiMessage("success login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginDTO) {
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getUsername(),
-                loginDTO.getPassword()
-        );
+                loginDTO.getPassword());
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
@@ -65,10 +62,7 @@ public class AuthController {
         return handleLoginOrRefreshCase(authentication.getName());
     }
 
-    @Operation(
-            summary = "Get current user info",
-            description = "Retrieve the current authenticated user's information based on the JWT access token."
-    )
+    @Operation(summary = "Get current user info", description = "Retrieve the current authenticated user's information based on the JWT access token.")
     @GetMapping("/auth/account")
     public ResponseEntity<LoginResponseDTO> getAccount() {
         String username = SecurityUtil.getCurrentUserLogin().orElse(null);
@@ -79,30 +73,24 @@ public class AuthController {
 
         if (currentUserDB != null) {
 
-            LoginResponseDTO.UserLoginResponseDTO userLogin
-                    = new LoginResponseDTO.UserLoginResponseDTO(
+            LoginResponseDTO.UserLoginResponseDTO userLogin = new LoginResponseDTO.UserLoginResponseDTO(
                     currentUserDB.getId(),
                     currentUserDB.getEmail(),
                     currentUserDB.getFullName(),
                     currentUserDB.getAvatar(),
                     currentUserDB.getPhone(),
-                    new LoginResponseDTO.RoleLoginResponse(currentUserDB.getRole().getCode())
-            );
+                    new LoginResponseDTO.RoleLoginResponse(currentUserDB.getRole().getCode()));
             result.setUser(userLogin);
         }
 
         return ResponseEntity.ok().body(result);
     }
 
-    @Operation(
-            summary = "Refresh JWT tokens",
-            description = "Generate a new access token using the provided refresh token from cookie. Also returns updated user info."
-    )
+    @Operation(summary = "Refresh JWT tokens", description = "Generate a new access token using the provided refresh token from cookie. Also returns updated user info.")
     @GetMapping("/auth/refresh")
     @ApiMessage("Refresh token")
     public ResponseEntity<LoginResponseDTO> handleRefreshToken(
-            @CookieValue(value = "refresh_token", defaultValue = "") String refreshToken
-    ) {
+            @CookieValue(value = "refresh_token", defaultValue = "") String refreshToken) {
         if (refreshToken.isBlank()) {
             throw new IdInvalidException("refresh token is required");
         }
@@ -116,10 +104,8 @@ public class AuthController {
         }
         return handleLoginOrRefreshCase(email);
     }
-    @Operation(
-            summary = "User logout",
-            description = "Logs out the current user by invalidating the refresh token and removing the cookie."
-    )
+
+    @Operation(summary = "User logout", description = "Logs out the current user by invalidating the refresh token and removing the cookie.")
     @PostMapping("/auth/logout")
     @ApiMessage("Logout user")
     public ResponseEntity<Void> logout() {
@@ -134,48 +120,36 @@ public class AuthController {
         }
         throw new IdInvalidException("Logout user is invalid!!!");
     }
-    @Operation(
-            summary = "User registration",
-            description = "Registers a new user account with the provided information."
-    )
+
+    @Operation(summary = "User registration", description = "Registers a new user account with the provided information.")
     @PostMapping("/auth/register")
     @ApiMessage("Created user account and send email to user")
     public ResponseEntity<UserResponseDTO> register(
             @RequestBody User userRequest,
             @RequestHeader(value = "X-Client-Type", defaultValue = "WEB") String clientType) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.handleCustomerRegister(userRequest, clientType));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.handleCustomerRegister(userRequest, clientType));
     }
 
-    @PostMapping("/users/change-password")
+    @PostMapping("/auth/change-password")
     @ApiMessage("change password success")
-    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO){
+    @Operation(summary = "Change user password", description = "Allows the user to change their password by providing the old and new passwords.")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO) {
         this.userService.handleChangePassword(changePasswordDTO);
-
         return ResponseEntity.ok(null);
     }
-
-    @PostMapping("/users/forgot-pwd")
-    @ApiMessage("send verify email successfully")
-    public ResponseEntity<Void> forgotPassword(
-            @Valid @RequestBody ForgotPasswordDTO forgotPasswordDTO,
-            @RequestHeader(value = "X-Client-Type", defaultValue = "WEB") String clientType){
-        this.userService.handleForgotPassword(forgotPasswordDTO, clientType);
-        return ResponseEntity.ok(null);
-    }
-
 
     @GetMapping("/auth/verify-email")
     @ApiMessage("User verified successfully")
+    @Operation(summary = "Verify user email", description = "Verify the user's email using the provided token and token type.")
     public ResponseEntity<?> verify(@RequestParam String token, TokenTypeEnum type) {
-
         return ResponseEntity.ok(userService.handleVerifyUser(token, type));
     }
 
-
-
     @PostMapping("/auth/resend-verify-email")
     @ApiMessage("Send email successfully")
+    @Operation(summary = "Resend verification email", description = "Resend the verification email to the user.")
     public ResponseEntity<Void> resend(
             @Valid @RequestBody ResendVerifyEmailRequestDTO dto,
             @RequestHeader(value = "X-Client-Type", defaultValue = "WEB") String clientType) {
@@ -183,16 +157,14 @@ public class AuthController {
         return ResponseEntity.ok(null);
     }
 
-
     @PostMapping("/auth/reset-pwd")
     @ApiMessage("User reset password successfully")
+    @Operation(summary = "Reset user password", description = "Reset the user's password using the provided token and new password.")
     public ResponseEntity<Void> resetPassword(
             @Valid @RequestBody ResetPasswordDTO dto) {
         userService.handleResetPassword(dto);
         return ResponseEntity.ok(null);
     }
-
-
 
     public ResponseCookie createCookie(String refreshToken, long maxAge) {
         return ResponseCookie.from("refresh_token", refreshToken)
@@ -208,18 +180,15 @@ public class AuthController {
         LoginResponseDTO responseLoginDTO = new LoginResponseDTO();
         User currentUserDB = userService.handleGetUserByUsername(username);
 
-
         if (currentUserDB != null) {
 
-            LoginResponseDTO.UserLoginResponseDTO userLogin
-                    = new LoginResponseDTO.UserLoginResponseDTO(
+            LoginResponseDTO.UserLoginResponseDTO userLogin = new LoginResponseDTO.UserLoginResponseDTO(
                     currentUserDB.getId(),
                     currentUserDB.getEmail(),
                     currentUserDB.getFullName(),
                     currentUserDB.getAvatar(),
                     currentUserDB.getPhone(),
-                    new LoginResponseDTO.RoleLoginResponse(currentUserDB.getRole().getCode())
-            );
+                    new LoginResponseDTO.RoleLoginResponse(currentUserDB.getRole().getCode()));
             responseLoginDTO.setUser(userLogin);
         }
 

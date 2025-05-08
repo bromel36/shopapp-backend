@@ -1,7 +1,7 @@
 package vn.ptithcm.shopapp.controller;
 
-
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ public class PaymentController {
     }
 
     @PostMapping("/payments")
+    @Operation(summary = "Create payment URL", description = "Generate a payment URL for the given payment request.")
     public ResponseEntity<PaymentResponseDTO> createPaymentUrl(
             @Valid @RequestBody PaymentRequestDTO dto,
             HttpServletRequest request) {
@@ -35,8 +36,8 @@ public class PaymentController {
     }
 
     @GetMapping("/payments/vnpay-payment-return")
-    public ResponseEntity<Void> getPaymentResult(@RequestParam Map<String,String> params){
+    @Operation(summary = "Handle payment result", description = "Process the payment result returned by VNPay.")
+    public ResponseEntity<Void> getPaymentResult(@RequestParam Map<String, String> params) {
         return ResponseEntity.ok(this.paymentService.handlePaymentResult(params));
     }
-
 }

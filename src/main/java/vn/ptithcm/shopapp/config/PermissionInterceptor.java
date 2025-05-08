@@ -4,6 +4,7 @@ package vn.ptithcm.shopapp.config;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -20,6 +21,7 @@ import vn.ptithcm.shopapp.model.entity.Permission;
 import java.util.List;
 
 @Component
+@Slf4j(topic = "INTERCEPTOR")
 public class PermissionInterceptor implements HandlerInterceptor {
 
 
@@ -36,13 +38,11 @@ public class PermissionInterceptor implements HandlerInterceptor {
     }
 
     List<String> allowedGetEndpoints = List.of(
-            "/api/v1/companies/**",
-            "/api/v1/jobs/**",
-            "/api/v1/skills/**"
+            "/api/v1/products/**",
+            "api/v1/brands/**",
+            "api/v1/categories/**"
     );
-    List<String> allowedPostEndpoints = List.of(
-            "/api/v1/resumes/**"
-    );
+
 
     @Override
     @Transactional
@@ -55,10 +55,10 @@ public class PermissionInterceptor implements HandlerInterceptor {
         String path = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String requestURI = request.getRequestURI();
         String httpMethod = request.getMethod();
-        System.out.println(">>> RUN preHandle");
-        System.out.println(">>> path= " + path);
-        System.out.println(">>> httpMethod= " + httpMethod);
-        System.out.println(">>> requestURI= " + requestURI);
+        log.info(">>> RUN preHandle");
+        log.info(">>> path= " + path);
+        log.info(">>> httpMethod= " + httpMethod);
+        log.info(">>> requestURI= " + requestURI);
 
 
         String email = SecurityUtil.getCurrentUserLogin().orElse("");
@@ -68,13 +68,6 @@ public class PermissionInterceptor implements HandlerInterceptor {
         if (user != null) {
             if (httpMethod.equalsIgnoreCase("GET")) {
                 for (String pattern : allowedGetEndpoints) {
-                    if (pathMatcher.match(pattern, path)) {
-                        return true;
-                    }
-                }
-            }
-            if (httpMethod.equalsIgnoreCase("POST")) {
-                for (String pattern : allowedPostEndpoints) {
                     if (pathMatcher.match(pattern, path)) {
                         return true;
                     }

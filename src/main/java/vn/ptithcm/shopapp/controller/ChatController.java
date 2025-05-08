@@ -13,7 +13,7 @@ import vn.ptithcm.shopapp.service.IChatService;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/api/v1/chat")
 @Tag(name = "Chat")
 public class ChatController {
 
