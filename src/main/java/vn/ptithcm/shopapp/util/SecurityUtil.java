@@ -1,6 +1,5 @@
 package vn.ptithcm.shopapp.util;
 
-
 import com.nimbusds.jose.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -30,17 +29,18 @@ public class SecurityUtil {
     public static final String INITIAL_PASSWORD = "123456";
     public static final String ROLE_ADMIN = "SYSADMIN";
 
-
     private final JwtEncoder jwtEncoder;
 
     public static final String[] whiteList = {
-            "/", "/api/v1/auth/refresh", "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/verify-email", "/api/v1/auth/resend-verify-email","/api/v1/auth/reset-pwd/**",
+            "/", "/api/v1/auth/refresh", "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/verify-email",
+            "/api/v1/auth/resend-verify-email", "/api/v1/auth/reset-pwd/**",
             "/storage/**",
             "/default-avatar.jpg",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api-document.html",
+            "/api-document/**",
             "/send/**",
             "/api/v1/users/forgot-pwd/**",
             "/api/v1/chat/**"
@@ -58,7 +58,6 @@ public class SecurityUtil {
 
     @Value("${ptithcm.jwt.base64-secret}")
     private String jwtKey;
-
 
     public String createToken(String email, LoginResponseDTO loginResponseDTO, long expirationTime) {
         Instant now = Instant.now();
