@@ -40,7 +40,6 @@ public class SecurityUtil {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api-document.html",
-            "/api-document/**",
             "/send/**",
             "/api/v1/users/forgot-pwd/**",
             "/api/v1/chat/**"
