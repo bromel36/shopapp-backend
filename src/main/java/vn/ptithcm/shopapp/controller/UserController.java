@@ -1,15 +1,20 @@
 package vn.ptithcm.shopapp.controller;
 
 import com.turkraft.springfilter.boot.Filter;
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import vn.ptithcm.shopapp.model.entity.Address;
 import vn.ptithcm.shopapp.model.entity.User;
 import vn.ptithcm.shopapp.model.request.ChangePasswordDTO;
 import vn.ptithcm.shopapp.model.request.ForgotPasswordDTO;
@@ -25,9 +30,13 @@ import vn.ptithcm.shopapp.validation.UpdateUserValidationGroup;
 @Tag(name = "User")
 public class UserController {
     private final IUserService userService;
+    private final FilterParser filterParser;
+    private final FilterSpecificationConverter filterSpecificationConverter;
 
-    public UserController(IUserService userService) {
+    public UserController(IUserService userService, FilterParser filterParser, FilterSpecificationConverter filterSpecificationConverter) {
         this.userService = userService;
+        this.filterParser = filterParser;
+        this.filterSpecificationConverter = filterSpecificationConverter;
     }
 
     @GetMapping("/users/{id}")
@@ -50,8 +59,14 @@ public class UserController {
     @ApiMessage("fetch all users")
     @Operation(summary = "Fetch all users", description = "Retrieve a paginated list of all users with optional filtering.")
     public ResponseEntity<PaginationResponseDTO> getAllUsers(
-            @Filter Specification<User> spec,
-            Pageable pageable) {
+            @Parameter(
+                    description = "Filtering expression (e.g., id:'1')",
+                    example = "id:'1'"
+            )
+            @RequestParam(name = "filter", required = false) String filter,
+
+            @ParameterObject Pageable pageable) {
+        Specification<User> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = userService.handleGetAllUsers(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
     }

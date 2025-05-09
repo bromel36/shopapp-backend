@@ -1,14 +1,19 @@
 package vn.ptithcm.shopapp.controller;
 
 import com.turkraft.springfilter.boot.Filter;
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.ptithcm.shopapp.model.entity.Address;
 import vn.ptithcm.shopapp.model.entity.Permission;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.service.IPermissionService;
@@ -21,9 +26,13 @@ import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 public class PermissionController {
 
     private final IPermissionService permissionService;
+    private final FilterParser filterParser;
+    private final FilterSpecificationConverter filterSpecificationConverter;
 
-    public PermissionController(PermissionService permissionService) {
+    public PermissionController(PermissionService permissionService, FilterParser filterParser, FilterSpecificationConverter filterSpecificationConverter) {
         this.permissionService = permissionService;
+        this.filterParser = filterParser;
+        this.filterSpecificationConverter = filterSpecificationConverter;
     }
 
     @ApiMessage("create a permission")
@@ -53,8 +62,14 @@ public class PermissionController {
     @GetMapping("/permissions")
     @Operation(summary = "Fetch all permissions", description = "Retrieve a paginated list of all permissions with optional filtering.")
     public ResponseEntity<PaginationResponseDTO> getAllPermissions(
-            @Filter Specification<Permission> spec,
-            Pageable pageable) {
+            @Parameter(
+                    description = "Filtering expression (e.g., id:'1')",
+                    example = "id:'1'"
+            )
+            @RequestParam(name = "filter", required = false) String filter,
+
+            @ParameterObject Pageable pageable) {
+        Specification<Permission> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = this.permissionService.handleGetAllPermission(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
     }

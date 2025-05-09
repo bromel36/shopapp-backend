@@ -1,15 +1,20 @@
 package vn.ptithcm.shopapp.controller;
 
 import com.turkraft.springfilter.boot.Filter;
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.ptithcm.shopapp.model.entity.Address;
+import vn.ptithcm.shopapp.model.entity.Order;
 import vn.ptithcm.shopapp.model.request.AddressRequestDTO;
 import vn.ptithcm.shopapp.model.response.AddressResponseDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
@@ -21,10 +26,13 @@ import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 @Tag(name = "Address")
 public class AddressController {
     private final IAddressService addressService;
+    private final FilterParser filterParser;
+    private final FilterSpecificationConverter filterSpecificationConverter;
 
-
-    public AddressController(IAddressService addressService) {
+    public AddressController(IAddressService addressService, FilterParser filterParser, FilterSpecificationConverter filterSpecificationConverter) {
         this.addressService = addressService;
+        this.filterParser = filterParser;
+        this.filterSpecificationConverter = filterSpecificationConverter;
     }
 
     @PostMapping("/addresses")
@@ -53,13 +61,18 @@ public class AddressController {
     @ApiMessage("fetch all address")
     @Operation(summary = "Fetch all address", description = "Fetch a paginated list of all address with optional filtering.")
     public ResponseEntity<PaginationResponseDTO> getAllAddress(
-            @Filter Specification<Address> spec,
-            Pageable pageable) {
+            @Parameter(
+                    description = "Filtering expression (e.g., id:'1')",
+                    example = "id:'1'"
+            )
+            @RequestParam(name = "filter", required = false) String filter,
+
+            @ParameterObject Pageable pageable) {
+        Specification<Address> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = this.addressService.handldeFetchAllAddress(spec, pageable);
 
         return ResponseEntity.ok(paginationResponseDTO);
     }
-
 
     @DeleteMapping("addresses/{id}")
     @ApiMessage("delete a address")

@@ -1,10 +1,13 @@
 package vn.ptithcm.shopapp.controller;
 
-import com.turkraft.springfilter.boot.Filter;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -33,10 +36,14 @@ public class OrderController {
 
     private final IOrderService orderService;
     private final IUserService userService;
+    private final FilterParser filterParser;
+    private final FilterSpecificationConverter filterSpecificationConverter;
 
-    public OrderController(IOrderService orderService, IUserService userService) {
+    public OrderController(IOrderService orderService, IUserService userService, FilterParser filterParser, FilterSpecificationConverter filterSpecificationConverter) {
         this.orderService = orderService;
         this.userService = userService;
+        this.filterParser = filterParser;
+        this.filterSpecificationConverter = filterSpecificationConverter;
     }
 
     @PostMapping("/orders")
@@ -53,7 +60,7 @@ public class OrderController {
     @Operation(summary = "Admin create an order", description = "Create a new order and return the order details.")
     public ResponseEntity<OrderResponseDTO> createAdminOrder(@Validated(AdminCreateOrderValidationGroup.class) @RequestBody CreateOrderRequestDTO orderRequest) {
 
-        if(orderRequest.getUser() == null || orderRequest.getUser().getId() == null){
+        if (orderRequest.getUser() == null || orderRequest.getUser().getId() == null) {
             throw new IdInvalidException("User must be required");
         }
 
@@ -91,16 +98,26 @@ public class OrderController {
     @ApiMessage("get user order")
     @Operation(summary = "Fetch user orders", description = "Retrieve a paginated list of orders for a specific user.")
     public ResponseEntity<PaginationResponseDTO> getOrderByUserId(@PathVariable("userId") Long id,
-            Pageable pageable) {
+                                                                  Pageable pageable) {
         return ResponseEntity.ok().body(orderService.handleFetchOrderByUserId(id, pageable));
     }
 
     @GetMapping("/orders")
     @ApiMessage("fetch all orders")
-    @Operation(summary = "Fetch all orders", description = "Retrieve a paginated list of all orders with optional filtering.")
+    @Operation(
+            summary = "Fetch all orders",
+            description = "Retrieve a paginated list of all orders with optional filtering."
+    )
     public ResponseEntity<PaginationResponseDTO> getAllOrders(
-            @Filter Specification<Order> spec,
-            Pageable pageable) {
+            @Parameter(
+                    description = "Filtering expression (e.g., id:'1')",
+                    example = "id:'1'"
+            )
+            @RequestParam(name = "filter", required = false) String filter,
+
+            @ParameterObject Pageable pageable
+    ) {
+        Specification<Order> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = orderService.handlFetchAllOrders(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
     }

@@ -1,12 +1,17 @@
 package vn.ptithcm.shopapp.controller;
 
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.ptithcm.shopapp.model.entity.Address;
 import vn.ptithcm.shopapp.model.entity.Supplier;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
 import vn.ptithcm.shopapp.model.response.SupplierResponseDTO;
@@ -19,9 +24,13 @@ import vn.ptithcm.shopapp.util.annotations.ApiMessage;
 public class SupplierController {
 
     private final ISupplierService supplierService;
+    private final FilterParser filterParser;
+    private final FilterSpecificationConverter filterSpecificationConverter;
 
-    public SupplierController(ISupplierService supplierService) {
+    public SupplierController(ISupplierService supplierService, FilterParser filterParser, FilterSpecificationConverter filterSpecificationConverter) {
         this.supplierService = supplierService;
+        this.filterParser = filterParser;
+        this.filterSpecificationConverter = filterSpecificationConverter;
     }
 
     @ApiMessage("create a supplier")
@@ -57,8 +66,14 @@ public class SupplierController {
     @GetMapping("/suppliers")
     @Operation(summary = "Fetch all suppliers", description = "Retrieve a paginated list of all suppliers with optional filtering.")
     public ResponseEntity<PaginationResponseDTO> getAllSuppliers(
-            Specification<Supplier> spec,
-            Pageable pageable) {
+            @Parameter(
+                    description = "Filtering expression (e.g., id:'1')",
+                    example = "id:'1'"
+            )
+            @RequestParam(name = "filter", required = false) String filter,
+
+            @ParameterObject Pageable pageable) {
+        Specification<Supplier> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO responseDTO = supplierService.handleFetchAllSuppliers(spec, pageable);
 
         return ResponseEntity.ok().body(responseDTO);

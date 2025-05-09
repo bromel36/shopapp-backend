@@ -1,14 +1,19 @@
 package vn.ptithcm.shopapp.controller;
 
 import com.turkraft.springfilter.boot.Filter;
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.ptithcm.shopapp.model.entity.Address;
 import vn.ptithcm.shopapp.model.entity.Product;
 import vn.ptithcm.shopapp.model.request.ProductRequestDTO;
 import vn.ptithcm.shopapp.model.response.PaginationResponseDTO;
@@ -25,9 +30,13 @@ import java.util.Map;
 public class ProductController {
 
     private final IProductService productService;
+    private final FilterParser filterParser;
+    private final FilterSpecificationConverter filterSpecificationConverter;
 
-    public ProductController(IProductService productService) {
+    public ProductController(IProductService productService, FilterParser filterParser, FilterSpecificationConverter filterSpecificationConverter) {
         this.productService = productService;
+        this.filterParser = filterParser;
+        this.filterSpecificationConverter = filterSpecificationConverter;
     }
 
     @PostMapping("/products")
@@ -55,8 +64,14 @@ public class ProductController {
     @ApiMessage("fetch all products")
     @Operation(summary = "Fetch all products", description = "Retrieve a paginated list of all products with optional filtering.")
     public ResponseEntity<PaginationResponseDTO> getAllProducts(
-            @Filter Specification<Product> spec,
-            Pageable pageable) {
+            @Parameter(
+                    description = "Filtering expression (e.g., id:'1')",
+                    example = "id:'1'"
+            )
+            @RequestParam(name = "filter", required = false) String filter,
+
+            @ParameterObject Pageable pageable) {
+        Specification<Product> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = productService.handleFetchAllProducts(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
     }
