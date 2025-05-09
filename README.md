@@ -1,12 +1,13 @@
 # ShopApp
 
-ShopApp is an intelligent system designed for managing an e-commerce platform. It provides features for user authentication, product management, and secure access control, ensuring a seamless shopping experience for customers and administrators.
+ShopApp is a comprehensive e-commerce platform designed to streamline online shopping experiences. It integrates advanced features such as user authentication, role-based access control, product management, and payment processing. The platform is built with scalability, security, and performance in mind, making it suitable for both small and large-scale businesses.
 
 ## Table of Contents
 
 - [Features](#features)
 - [Technologies Used](#technologies-used)
-- [Getting Started](#getting-started)
+- [System Architecture](#system-architecture)
+- [Environment Setup](#environment-setup)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Running the Application](#running-the-application)
@@ -17,32 +18,68 @@ ShopApp is an intelligent system designed for managing an e-commerce platform. I
 
 ## Features
 
-- **User Authentication**: Secure login, registration, and email verification.
-- **Role-Based Access Control**: Separate roles for customers and administrators.
-- **Product Management**: Browse products, brands, and categories.
-- **Token Management**: JWT-based authentication with token refresh and expiration handling.
-- **Swagger Integration**: API documentation for developers.
-- **Error Handling**: Custom exceptions for better debugging and user feedback.
+- **User Management**:
+  - Secure login, registration, and email verification.
+  - Password reset and change functionality.
+  - Role-based access control (Admin, Customer).
+- **Product Management**:
+  - CRUD operations for products, categories, and brands.
+  - Advanced filtering and search capabilities.
+- **Cart and Order Management**:
+  - Add, update, and remove items from the cart.
+  - Place orders and track order status.
+- **Payment Integration**:
+  - VNPay integration for secure online payments.
+- **File Management**:
+  - Upload and download files/images using Cloudinary and local storage.
+- **API Documentation**:
+  - Swagger UI for exploring and testing APIs.
+- **Security**:
+  - JWT-based authentication with token refresh and expiration handling.
+  - Permission-based API access control.
+- **Database Initialization**:
+  - Automatic seeding of roles, permissions, and default users.
 
 ## Technologies Used
 
-- **Java**: Core programming language.
-- **Spring Boot**: Backend framework for building RESTful APIs.
-- **JWT (JSON Web Tokens)**: Secure token-based authentication.
-- **Nimbus JOSE + JWT**: Library for JWT encoding and decoding.
-- **Swagger**: API documentation and testing.
-- **Maven**: Dependency management and build tool.
+- **Backend**:
+  - Java 17
+  - Spring Boot (Web, Security, Data JPA, Validation)
+  - Hibernate (ORM)
+- **Authentication**:
+  - JWT (JSON Web Tokens)
+  - Nimbus JOSE + JWT
+- **Database**:
+  - MySQL
+- **File Storage**:
+  - Cloudinary (for image uploads)
+  - Local file storage
+- **API Documentation**:
+  - SpringDoc OpenAPI (Swagger)
+- **Messaging**:
+  - SendGrid (Email service)
+- **Build Tool**:
+  - Maven
+- **Containerization**:
+  - Docker
 
-## Getting Started
+## System Architecture
+
+The system follows a layered architecture:
+- **Controller Layer**: Handles HTTP requests and responses.
+- **Service Layer**: Contains business logic.
+- **Repository Layer**: Manages database interactions.
+- **Utility Layer**: Provides helper functions for security, pagination, etc.
+
+## Environment Setup
 
 ### Prerequisites
 
-Ensure you have the following installed on your system:
-
+Ensure you have the following installed:
 - Java 17 or higher
 - Maven 3.8 or higher
-- A database (e.g., MySQL, PostgreSQL)
-- An IDE (e.g., IntelliJ IDEA, Eclipse)
+- MySQL (or any compatible database)
+- Docker (optional, for containerized deployment)
 
 ### Installation
 
@@ -52,9 +89,8 @@ Ensure you have the following installed on your system:
    cd shopapp
    ```
 
-2. Configure the application properties:
-   - Navigate to `src/main/resources/application.properties`.
-   - Update the database connection details and JWT secret key.
+2. Configure environment variables:
+   - Update `application.yaml` or `application.properties` with your database, JWT, Cloudinary, and VNPay credentials.
 
 3. Install dependencies:
    ```bash
@@ -63,7 +99,7 @@ Ensure you have the following installed on your system:
 
 ### Running the Application
 
-1. Start the application:
+1. Start the backend:
    ```bash
    mvn spring-boot:run
    ```
@@ -71,6 +107,18 @@ Ensure you have the following installed on your system:
 2. Access the application:
    - API Base URL: `http://localhost:8080`
    - Swagger UI: `http://localhost:8080/swagger-ui.html`
+
+### Docker Deployment
+
+1. Build the Docker image:
+   ```bash
+   docker build -t shopapp .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -p 8080:8080 shopapp
+   ```
 
 ## API Documentation
 
@@ -83,30 +131,25 @@ shopapp/
 ├── src/
 │   ├── main/
 │   │   ├── java/vn/ptithcm/shopapp/
-│   │   │   ├── controller/    # REST controllers
-│   │   │   ├── model/         # Entity and DTO classes
-│   │   │   ├── service/       # Business logic
-│   │   │   ├── util/          # Utility classes
+│   │   │   ├── config/         # Configuration files
+│   │   │   ├── controller/     # REST controllers
+│   │   │   ├── converter/      # DTO converters
+│   │   │   ├── error/          # Custom exceptions and handlers
+│   │   │   ├── model/          # Entity and DTO classes
+│   │   │   ├── repository/     # Data access layer
+│   │   │   ├── service/        # Business logic
+│   │   │   ├── util/           # Utility classes
 │   │   └── resources/
-│   │       ├── application.properties  # Configuration
-│   └── test/                 # Unit and integration tests
-├── pom.xml                   # Maven configuration
-└── README.md                 # Project documentation
+│   │       ├── application.yaml  # Configuration
+│   │       ├── application.properties  # Optional properties
+        └── test/                   # Unit and integration 
+├── Dockerfile                  # Docker configuration
+├── pom.xml                     # Maven configuration
+└── README.md                   # Project documentation
 ```
-
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Commit your changes and push the branch.
-4. Submit a pull request.
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-
-**Developed with ❤️ by PTIT HCM Team**
