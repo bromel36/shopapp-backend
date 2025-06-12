@@ -117,7 +117,7 @@ public class OrderController {
 
             @ParameterObject Pageable pageable
     ) {
-        Specification<Order> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<Order> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = orderService.handlFetchAllOrders(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
     }

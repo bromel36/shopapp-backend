@@ -68,7 +68,7 @@ public class AddressController {
             @RequestParam(name = "filter", required = false) String filter,
 
             @ParameterObject Pageable pageable) {
-        Specification<Address> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<Address> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = this.addressService.handldeFetchAllAddress(spec, pageable);
 
         return ResponseEntity.ok(paginationResponseDTO);

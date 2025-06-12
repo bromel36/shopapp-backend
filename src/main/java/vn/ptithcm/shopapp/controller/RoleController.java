@@ -73,7 +73,7 @@ public class RoleController {
             @RequestParam(name = "filter", required = false) String filter,
 
             @ParameterObject Pageable pageable) {
-        Specification<Role> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<Role> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = this.roleService.handleGetAllRoles(spec, pageable);
 
         return ResponseEntity.ok(paginationResponseDTO);

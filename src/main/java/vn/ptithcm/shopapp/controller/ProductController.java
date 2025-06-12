@@ -71,7 +71,7 @@ public class ProductController {
             @RequestParam(name = "filter", required = false) String filter,
 
             @ParameterObject Pageable pageable) {
-        Specification<Product> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<Product> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = productService.handleFetchAllProducts(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
     }

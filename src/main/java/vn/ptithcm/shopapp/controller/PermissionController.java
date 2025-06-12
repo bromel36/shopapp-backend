@@ -69,7 +69,7 @@ public class PermissionController {
             @RequestParam(name = "filter", required = false) String filter,
 
             @ParameterObject Pageable pageable) {
-        Specification<Permission> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<Permission> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = this.permissionService.handleGetAllPermission(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
     }

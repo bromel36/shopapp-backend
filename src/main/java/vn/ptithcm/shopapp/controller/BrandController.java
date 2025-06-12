@@ -65,7 +65,7 @@ public class BrandController {
             @RequestParam(name = "filter", required = false) String filter,
 
             @ParameterObject Pageable pageable) {
-        Specification<Brand> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<Brand> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = this.brandService.handldeFetchAllBrands(spec, pageable);
 
         return ResponseEntity.ok(paginationResponseDTO);

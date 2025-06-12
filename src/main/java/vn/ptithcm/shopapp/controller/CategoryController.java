@@ -74,7 +74,7 @@ public class CategoryController {
             @RequestParam(name = "filter", required = false) String filter,
 
             @ParameterObject Pageable pageable) {
-        Specification<Category> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<Category> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = this.categoryService.handleFetchAllCategories(spec, pageable);
 
         return ResponseEntity.ok(paginationResponseDTO);

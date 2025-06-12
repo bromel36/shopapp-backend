@@ -73,7 +73,7 @@ public class SupplierController {
             @RequestParam(name = "filter", required = false) String filter,
 
             @ParameterObject Pageable pageable) {
-        Specification<Supplier> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<Supplier> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO responseDTO = supplierService.handleFetchAllSuppliers(spec, pageable);
 
         return ResponseEntity.ok().body(responseDTO);

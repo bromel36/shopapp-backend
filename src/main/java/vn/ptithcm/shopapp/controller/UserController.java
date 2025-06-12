@@ -66,7 +66,7 @@ public class UserController {
             @RequestParam(name = "filter", required = false) String filter,
 
             @ParameterObject Pageable pageable) {
-        Specification<User> spec = filter == null ? null : filterSpecificationConverter.convert(filterParser.parse(filter));
+        Specification<User> spec = filter == null ? Specification.where(null) : filterSpecificationConverter.convert(filterParser.parse(filter));
         PaginationResponseDTO paginationResponseDTO = userService.handleGetAllUsers(spec, pageable);
         return ResponseEntity.ok(paginationResponseDTO);
     }
