@@ -3,7 +3,6 @@ package vn.ptithcm.shopapp.model.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,8 +42,9 @@ public class OrderResponseDTO {
 
     private UserOrder user;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private OrderAddressResponse address;
+    private String name;
+    private String shippingAddress;
+    private String phone;
 
     private List<OrderDetailsResponse> orderDetails;
 
@@ -68,25 +68,8 @@ public class OrderResponseDTO {
         private Integer quantity;
         private String productName;
         private String productThumbnail;
+        private String productId;
     }
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class OrderAddressResponse{
-        private Long id;
-        private String recipientName;
-
-        private String phoneNumber;
-
-        private String street;
-
-        private String ward;
-
-        private String district;
-
-        private String city;
-    }
 
 }

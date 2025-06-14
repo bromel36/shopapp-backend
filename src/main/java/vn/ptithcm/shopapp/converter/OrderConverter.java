@@ -17,18 +17,22 @@ public class OrderConverter {
         this.modelMapper = modelMapper;
     }
 
-    public Order convertToOrder(CreateOrderRequestDTO dto) {
-        Order order = new Order();
+    public void convertToOrder(Order order, CreateOrderRequestDTO dto) {
 
-        if (dto.getStatus()== null){
+        if(dto.getStatus() == null){
             order.setStatus(OrderStatusEnum.PENDING);
         }
         else{
             order.setStatus(dto.getStatus());
         }
+
         order.setPaymentMethod(dto.getPaymentMethod());
-// xài modelmapper chỗ này nó sẽ bị lỗi nên phải làm chay
-        return order;
+        order.setName(dto.getName());
+        order.setShippingAddress(dto.getShippingAddress());
+        order.setPhone(dto.getPhone());
+
+
+
     }
 
     public OrderResponseDTO convertToOrderResponseDTO(Order order) {

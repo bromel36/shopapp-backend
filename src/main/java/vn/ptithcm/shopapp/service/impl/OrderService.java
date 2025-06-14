@@ -45,8 +45,6 @@ public class OrderService implements IOrderService {
     ProductService productService;
     OrderDetailRepository orderDetailRepository;
     IUserService userService;
-    IAddressService addressService;
-    ProductRepository productRepository;
     FilterParser filterParser;
     FilterSpecificationConverter filterSpecificationConverter;
 
@@ -56,9 +54,10 @@ public class OrderService implements IOrderService {
     @Transactional
     public OrderResponseDTO handleCreateOrder(CreateOrderRequestDTO orderRequest, User userOrder) {
 
-        validateOrderRequest(orderRequest);
+        Order order = new Order();
 
-        Order order = saveOrder(orderRequest, userOrder);
+        orderConverter.convertToOrder(order, orderRequest);
+        order.setUser(userOrder);
 
         processOrderDetails(orderRequest, order);
 
@@ -84,17 +83,14 @@ public class OrderService implements IOrderService {
             throw new IdInvalidException("Customers does not update this order status");
         }
 
+        if(order.getStatus().equals(OrderStatusEnum.PENDING)) {
+            order.setName(ordRequest.getName() == null ? order.getName() : ordRequest.getName());
+            order.setPhone(ordRequest.getPhone() == null ? order.getPhone() : ordRequest.getPhone());
+            order.setShippingAddress(ordRequest.getShippingAddress() == null ? order.getShippingAddress() : ordRequest.getShippingAddress());
+        }
+
         order.setStatus(ordRequest.getStatus());
 
-//        if (ordRequest.getAddress().getId() != order.getAddress().getId()) {
-//            Address addressDB = addressService.handleFetchAddressById(ordRequest.getAddress().getId());
-//
-//            if(addressDB.getUser().getId() != user.getId()){
-//                throw new IdInvalidException("Invalid address");
-//            }
-//            order.setAddress(addressDB);
-//        }
-        validateAndUpdateOrderAddress(order, ordRequest.getAddress().getId(), user.getId());
         orderRepository.save(order);
         return orderConverter.convertToOrderResponseDTO(order);
     }
@@ -109,17 +105,13 @@ public class OrderService implements IOrderService {
             }
         }
 
-        order.setStatus(ordRequest.getStatus());
+        if(ordRequest.getStatus().equals(OrderStatusEnum.PENDING)) {
+            order.setName(ordRequest.getName() == null ? order.getName() : ordRequest.getName());
+            order.setPhone(ordRequest.getPhone() == null ? order.getPhone() : ordRequest.getPhone());
+            order.setShippingAddress(ordRequest.getShippingAddress() == null ? order.getShippingAddress() : ordRequest.getShippingAddress());
+        }
 
-//        if (ordRequest.getAddress().getId() != order.getAddress().getId()) {
-//            Address addressDB = addressService.handleFetchAddressById(ordRequest.getAddress().getId());
-//
-//            if(addressDB.getUser().getId() != order.getUser().getId()){
-//                throw new IdInvalidException("Invalid address");
-//            }
-//            order.setAddress(addressDB);
-//        }
-        validateAndUpdateOrderAddress(order, ordRequest.getAddress().getId(), order.getUser().getId());
+        order.setStatus(ordRequest.getStatus());
 
         orderRepository.save(order);
         return orderConverter.convertToOrderResponseDTO(order);
@@ -182,30 +174,6 @@ public class OrderService implements IOrderService {
     }
 
 
-
-    private void validateOrderRequest(CreateOrderRequestDTO orderRequest) {
-        if (orderRequest.getOrderDetails().isEmpty()) {
-            throw new IdInvalidException("Order Detail might be empty. Please add a product!!!");
-        }
-    }
-
-    private Order saveOrder(CreateOrderRequestDTO orderRequest, User userOrder) {
-
-        Address address = null;
-        if(orderRequest.getAddress() != null && orderRequest.getAddress().getId() != null) {
-            address = addressService.handleFetchAddressById(orderRequest.getAddress().getId());
-
-            if (address.getUser().getId() != userOrder.getId()) {
-                throw new IdInvalidException("Users don't have the same address");
-            }
-        }
-
-        Order order = orderConverter.convertToOrder(orderRequest);
-        order.setAddress(address);
-        order.setUser(userOrder);
-        return orderRepository.save(order);
-    }
-
     private void processOrderDetails(CreateOrderRequestDTO orderRequest, Order order) {
         List<String> productIds = orderRequest.getOrderDetails().stream()
                 .map(CreateOrderRequestDTO.OrderDetails::getProductId)
@@ -247,17 +215,7 @@ public class OrderService implements IOrderService {
         order.setTotalMoney(totalMoney);
 //        productRepository.saveAll(products);
         orderDetailRepository.saveAll(orderDetails);
+        orderRepository.save(order);
     }
-    private void validateAndUpdateOrderAddress(Order order, Long newAddressId, Long userId) {
-        if (!order.getAddress().getId().equals(newAddressId)) {
-            Address addressDB = addressService.handleFetchAddressById(newAddressId);
-
-            if (!addressDB.getUser().getId().equals(userId)) {
-                throw new IdInvalidException("Invalid address");
-            }
-            order.setAddress(addressDB);
-        }
-    }
-
 
 }
