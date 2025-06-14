@@ -45,6 +45,9 @@ public class AddressService implements IAddressService {
 
         Address addressEntity = addressConverter.convertToAddress(address);
 
+        if(userDB.getAddress().isEmpty() && !addressEntity.getIsDefault()){
+            addressEntity.setIsDefault(true);
+        }
 
         addressEntity.setUser(userDB);
 
@@ -69,10 +72,15 @@ public class AddressService implements IAddressService {
         addressDB.setCity(address.getCity());
 
         // dang false thanh true
-        if (address.getIsDefault() && addressDB.getIsDefault()!= address.getIsDefault()) {
+        if (address.getIsDefault() && !addressDB.getIsDefault()) {
             List<Address> addresses = userDB.getAddresses();
             addresses.forEach(it -> it.setIsDefault(false));
         }
+
+        if(userDB.getAddress().length() == 1 && !address.getIsDefault()){
+            addressDB.setIsDefault(true);
+        }
+
         addressDB.setIsDefault(address.getIsDefault());
 
         addressRepository.save(addressDB);
@@ -109,19 +117,19 @@ public class AddressService implements IAddressService {
 
     public User validatePermission(Long userId){
 
-        User userDB = userService.getUserById(userId);
-
         User currentUserLogin = userService.getUserLogin();
 
-        if (SecurityUtil.isCustomer(currentUserLogin) && currentUserLogin.getId() != userDB.getId()) {
+        if (currentUserLogin.getId() != userId) {
             throw new AccessDeniedException("Customers are only insert/update address for themselves");
         }
 
-        return userDB;
+        return currentUserLogin;
     }
     public Address handleFetchAddressById(Long id) {
         Address address = addressRepository.findById(id)
                 .orElseThrow(()-> new IdInvalidException("Address not found"));
         return address;
     }
+
+
 }

@@ -38,7 +38,4 @@ public class Address extends Base{
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "address", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Order> orders;
 }

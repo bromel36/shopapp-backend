@@ -26,16 +26,8 @@ public class UpdateOrderRequestDTO {
     @Enumerated(EnumType.STRING)
     private OrderStatusEnum status;
 
-    @Valid
-    @NotNull(message = "Address is required")
-    private UpdateOrderRequestAddress address;
+    private String name;
+    private String shippingAddress;
+    private String phone;
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class UpdateOrderRequestAddress{
-        @NotNull(message = "Address id is required")
-        private Long id;
-    }
 }

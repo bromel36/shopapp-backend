@@ -23,6 +23,10 @@ public class Order extends Base {
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
 
+    private String name;
+    private String shippingAddress;
+    private String phone;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -43,7 +47,4 @@ public class Order extends Base {
     @JsonIgnore
     private List<InventoryLog> inventoryLogs;
 
-    @ManyToOne
-    @JoinColumn(name = "address_id")
-    private Address address;
 }
