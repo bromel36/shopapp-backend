@@ -27,8 +27,8 @@ public class GlobalException {
     })
     public ResponseEntity<RestResponse<Object>> handleUsernameNotFoundException(Exception ex){
         RestResponse<Object> res = new RestResponse<>();
-        res.setMessage("Exception occur ....");
-        res.setError(ex.getMessage());
+        res.setMessage(ex.getMessage());
+        res.setError("Exception occur ....");
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);

@@ -45,7 +45,8 @@ public class AddressService implements IAddressService {
 
         Address addressEntity = addressConverter.convertToAddress(address);
 
-        if(userDB.getAddress().isEmpty() && !addressEntity.getIsDefault()){
+
+        if(userDB.getAddresses().isEmpty() && !addressEntity.getIsDefault()){
             addressEntity.setIsDefault(true);
         }
 
@@ -77,8 +78,8 @@ public class AddressService implements IAddressService {
             addresses.forEach(it -> it.setIsDefault(false));
         }
 
-        if(userDB.getAddress().length() == 1 && !address.getIsDefault()){
-            addressDB.setIsDefault(true);
+        if(!address.getIsDefault()){
+            throw new IdInvalidException("To remove this address as the default, please select a new one");
         }
 
         addressDB.setIsDefault(address.getIsDefault());
